@@ -1,0 +1,16 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\src",
+    "\\src\\main",
+    "\\src\\main\\java",
+    "\\src\\main\\java\\ru",
+    "\\src\\main\\java\\ru\\data",
+    "\\src\\main\\java\\ru\\data\\anonymization",
+    "\\src\\main\\java\\ru\\data\\anonymization\\tool",
+    "\\src\\main\\java\\ru\\data\\anonymization\\tool\\component",
+    "\\src\\main\\java\\ru\\data\\anonymization\\tool\\config"
+  ],
+  "SelectedNode": "\\src\\main\\java\\ru\\data\\anonymization\\tool\\config\\AppContext.java",
+  "PreviewInSolutionExplorer": false
+}
