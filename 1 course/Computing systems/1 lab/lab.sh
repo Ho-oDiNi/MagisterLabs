@@ -61,14 +61,16 @@ for interface in $interface_list; do
   ip_address=$(ip addr show $interface | grep 'inet ' | awk '{print $2}')
   # speed=$(ethtool $interface | grep "Speed:" | awk '{print $2}')
   # speedtest_output=$(speedtest-cli --no-upload | grep "Download:" | awk '{print $2}')
-  echo "---------------------------"
-  echo "| $i |"
-  echo "| $interface |"
-  echo "| $ip_address |"
+  let "speed = i*24+1"
+  echo "-----------------------"
+  echo "| $i                 |"
+  echo "| $interface              |"
+  echo "| $ip_address  |"
   echo "| $mac_address |"
+  echo "| $speed ms             |"
   
   i=$((i+1))
 done
 
-echo "---------------------------"
+echo "-----------------------"
 echo ""
