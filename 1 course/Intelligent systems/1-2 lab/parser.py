@@ -5,6 +5,7 @@ import pymorphy3
 from pymystem3 import Mystem
 import re
 
+# Заполняем БД
 def createTables(dbFileName):
     
     cur = dbFileName.cursor()
@@ -44,7 +45,7 @@ def createTables(dbFileName):
 
     return
 
-
+# Удаляем БД
 def deleteTables(dbFileName):
     
     cur = dbFileName.cursor()
@@ -59,7 +60,7 @@ def deleteTables(dbFileName):
 
     return
 
-
+# Паук
 class Crawler:
 
     # 0. Конструктор Инициализация паука с параметрами БД
@@ -123,6 +124,7 @@ class Crawler:
 
         return newTextList
 
+    # Удалить все кроме букв и цифр
     def clearText(self, text):
         return re.sub(r'[\W ]+', ' ', text)
 
@@ -233,7 +235,7 @@ class Crawler:
         return request_id[0]
 
 
-
+    # Форматируем ссылку - Очищаем ссылку от ненужный хуков и тд
     def linkFilter(self, soup):
             try:
                 links = soup.find('main').find_all('a', href=True)
@@ -268,6 +270,8 @@ class Crawler:
 
             return newfilteredLinks, newtextLinks
 
+
+    # Двумерный массив в одномерный
     def doubleArrayToSingle(self, doubleArray):
         singleArray = []
         for arr in doubleArray:
@@ -276,9 +280,13 @@ class Crawler:
             
         return singleArray
 
+
+    # Удалить все союзы междометия и тд
     def pos(self, word):
         return self.morth.parse(word)[0].inflect({'gent'}).word
 
+
+    # Форматируем текст - преобразуем в именительный паддеж 1 число, удаляем все союзы и тд
     def textFilter(self, text):
         newText = []
         textList = []
