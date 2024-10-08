@@ -3,6 +3,7 @@ import requests
 import sqlite3
 import pymorphy3
 from pymystem3 import Mystem
+import csv
 import re
 
 # Заполняем БД
@@ -94,9 +95,10 @@ class Crawler:
             return
 
         url_id = self.getEntryId('db_urlList', 'url', url)  #   Получаем идентификатор URL getEntryId
+        
         location = 0
         for word in textList:
-            location =+ 1
+            location = location + 1
             word_id = self.getEntryId('db_wordList', 'word', word)
             word_location_id = self.getEntryId('db_wordLocation', 'fk_url_id', url_id, 'fk_word_id', word_id, 'location', location) 
 
@@ -183,11 +185,13 @@ class Crawler:
             
                 filteredLinks, textLinks = self.linkFilter(soup)
                 
-                for i in range(len(filteredLinks)):
-                    print(f"{url} -> {filteredLinks[i]}")
-                    self.addLinkRef(url, filteredLinks[i], textLinks[i])
+                # for i in range(len(filteredLinks)):
+                #     print(f"{url} -> {filteredLinks[i]}")
+                #     self.addLinkRef(url, filteredLinks[i], textLinks[i])
 
                 self.addIndex(soup, url) # вызвать функцию класса Crawler для добавления содержимого в индекс
+
+                self.check_db()
 
                 newUrlList.append (filteredLinks)
 
@@ -307,6 +311,71 @@ class Crawler:
 
         return newText
 
+    def writeCsv(self, worlListLen, linkBetweenURLLen, UrlListLen, filename = "db_Inserting.csv"):
+        with open(filename, 'w', newline='') as csvfile:
+            spamwriter = csv.writer(csvfile, delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+            spamwriter.writerow([worlListLen, linkBetweenURLLen, UrlListLen])
+
+    def check_db(self):
+        cur = self.db.cursor()
+
+        requestGetWorlList = f"SELECT * FROM db_wordList"
+        requestGetLinkBetweenURL = f"SELECT * FROM db_linkBetweenURL"
+        requestGetUrlList = f"SELECT * FROM db_urlList"
+
+        worlListLen = len(cur.execute(f"{requestGetWorlList}").fetchall())
+        linkBetweenURLLen = len(cur.execute(f"{requestGetLinkBetweenURL}").fetchall())
+        UrlListLen = len(cur.execute(f"{requestGetUrlList}").fetchall())
+
+        self.writeCsv(worlListLen, linkBetweenURLLen, UrlListLen)
+
+        return
+
+    # def getManyURL(self):
+        # cur = self.db.cursor()
+
+    #     requestGet = f"SELECT url FROM db_urlList"
+    #     urls = cur.execute(f"{requestGet}").fetchall()
+    #     self.db.commit()
+
+    #     urlList = []
+
+    #     for i in urls:
+    #         urlList.append(i[0][8:].split('/', 1)[0])
+
+    #     sortedURLs = sorted(urlList)
+
+    #     result = []
+    #     count = []
+
+    #     for i in range(500):
+    #         count.append(1)
+
+    #     j=0
+
+    #     for i in range(len(sortedURLs)):
+    #         sortedURLs[i] = sortedURLs[i].split('http:', 1)[0]
+
+    #     for i in range(len(sortedURLs)-1):
+            
+    #         if sortedURLs[i] == sortedURLs[i+1]:
+    #             count[j-1] += 1
+                
+    #         if sortedURLs[i] != sortedURLs[i+1]:
+    #             result.append(sortedURLs[i+1])
+    #             j+=1
+
+
+    #     printedList = []
+    #     for i in range(len(result)):
+    #         printedList.append(f"{count[i]} = {result[i]}")
+
+    #     sortedPrintedList = sorted(printedList, reverse=True)
+        
+    #     for i in range(20):
+    #         print(sortedPrintedList[i])
+        # return
+
         
 
 def main():
@@ -319,6 +388,8 @@ def main():
     
     crawler = Crawler('crawl.db', url)
     crawler.crawl(urlList, maxDepth=2)
+
+
 
 if __name__ == '__main__':
     main()
