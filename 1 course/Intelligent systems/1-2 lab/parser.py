@@ -68,7 +68,7 @@ class Crawler:
     def __init__(self, dbFileName, mainUrl):
         self.db = sqlite3.connect(dbFileName)
         # createTables(self.db)
-
+        
         self.mainUrl = mainUrl
         self.functors_pos = {'INTJ', 'PRCL', 'CONJ', 'PREP'}
         self.m = Mystem()
@@ -185,9 +185,9 @@ class Crawler:
             
                 filteredLinks, textLinks = self.linkFilter(soup)
                 
-                # for i in range(len(filteredLinks)):
-                #     print(f"{url} -> {filteredLinks[i]}")
-                #     self.addLinkRef(url, filteredLinks[i], textLinks[i])
+                for i in range(len(filteredLinks)):
+                    print(f"{url} -> {filteredLinks[i]}")
+                    self.addLinkRef(url, filteredLinks[i], textLinks[i])
 
                 self.addIndex(soup, url) # вызвать функцию класса Crawler для добавления содержимого в индекс
 
@@ -312,7 +312,7 @@ class Crawler:
         return newText
 
     def writeCsv(self, worlListLen, linkBetweenURLLen, UrlListLen, filename = "db_Inserting.csv"):
-        with open(filename, 'w', newline='') as csvfile:
+        with open(filename, 'a', newline='') as csvfile:
             spamwriter = csv.writer(csvfile, delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
             spamwriter.writerow([worlListLen, linkBetweenURLLen, UrlListLen])
 
@@ -382,7 +382,7 @@ def main():
 
     url = 'https://www.journal.zarplata.ru'
     urlList = ['https://www.journal.zarplata.ru']
-    for i in range(1, 3):   #90
+    for i in range(1, 90):   #90
         url_page = url + '/page/' + str(i)
         urlList.append(url_page)
     
