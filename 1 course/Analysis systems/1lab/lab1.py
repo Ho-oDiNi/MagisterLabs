@@ -103,6 +103,7 @@ def randomEquation(multipliers, C, N):
     startX, endX = input().split()
 
     ArrayX = np.random.uniform(int(startX), int(endX), N)
+    ArrayX = np.sort(ArrayX)
     print(f"X = {ArrayX}")
     
     ArrayY = np.array(calculateY(ArrayX, multipliers, C, N))
@@ -164,6 +165,10 @@ def Euclid():
     
     ArrayX, ArrayY = randomEquation(multipliers, C, N)
     ArrayYe = addE(ArrayY, N)
+
+    plt.plot(ArrayX, ArrayY, color = "green")
+    plt.plot(ArrayX, ArrayYe, color = "red")
+    plt.show()
 
     aMatrix = createAMatrix(ArrayX, N, order)
     rMatrix = findR(aMatrix, ArrayYe)
