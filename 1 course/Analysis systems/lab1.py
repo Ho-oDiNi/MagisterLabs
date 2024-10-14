@@ -17,7 +17,8 @@ import matplotlib.pyplot as plt
     # ArrayYe = [105.983, 97.458, 6.454, 155.391]
 
 
-def srtingEquation(order, multipliers = False, C = False):
+# Вывод уравнения на экран
+def printEquation(order, multipliers = False, C = False):
     
     if(multipliers == False):
         multipliers = [""] * order
@@ -32,26 +33,31 @@ def srtingEquation(order, multipliers = False, C = False):
     else:
         equation += f" + {C}"
 
-    return equation
+
+    print(f"{equation} is right?")
+    print("Print Y or N")
+
+    key = input().lower()
+    if (key == 'y'):
+        return True
+
+    return False
 
 
+# Ввод пользователем порчдка уравнения
 def orderEquation():
     
     while(True):
         print("Input Order Equation")
         order = int(input())
         
-        equation = srtingEquation(order)
-        print(f"{equation} is right?")
-        print("Print Y or N")
-
-        request = input().lower()
-        if (request == 'y'):
+        if (printEquation(order)):
             break
 
     return order
 
 
+# Ввод пользователем значений уравнения
 def createEquation(order):
     
     while(True):
@@ -65,13 +71,9 @@ def createEquation(order):
         print("Input Value C")
         C = int(input())
 
-        equation = srtingEquation(order, multipliers, C)
-        print(f"{equation} is right?")
-        print("Print Y or N")
-
-        request = input().lower()
-        if (request == 'y'):
+        if (printEquation(order, multipliers, C)):
             break
+        
 
     print("Input N")
     N = int(input())
@@ -79,6 +81,7 @@ def createEquation(order):
     return multipliers, C, N
 
 
+# Найти Y для набора точек
 def calculateY(ArrayX, multipliers, C, N):
 
     ArrayY = []
@@ -88,12 +91,12 @@ def calculateY(ArrayX, multipliers, C, N):
         y = 0
         for j in range(order):
             y += multipliers[j] * pow(ArrayX[i], order-j)
-            # print(f"\n {multipliers[j]} * {ArrayX[i]}^{order-j}\n")
         ArrayY.append(y + C)
 
     return ArrayY
 
 
+# Создаем случайные точкм Х уравнения и высчитываемм их
 def randomEquation(multipliers, C, N):  
     
     print("Input X Interval")
@@ -110,6 +113,7 @@ def randomEquation(multipliers, C, N):
 
 
 
+# Добавляем ошибку
 def addE(ArrayY, N):
     
     print("Input e Interval")
@@ -124,6 +128,7 @@ def addE(ArrayY, N):
     return ArrayYe
 
 
+# Создаем матрицу A
 def createAMatrix(ArrayX, N, order):
     
     matrix = []
@@ -143,6 +148,7 @@ def createAMatrix(ArrayX, N, order):
 
 
 
+# Находим неизвестные множители
 def findR(aMatrix, bMatrix):
 
     rMatrix = inv(np.dot(aMatrix.T, aMatrix)).dot(aMatrix.T).dot(bMatrix)
@@ -151,6 +157,7 @@ def findR(aMatrix, bMatrix):
     return rMatrix
 
 
+# Метод Эвклида
 def Euclid():
     order = orderEquation()
     multipliers, C, N = createEquation(order)
@@ -164,6 +171,7 @@ def Euclid():
     return multipliers, C
 
 
+# Создаем точки P и T, сортируем их
 def createPT(N):
 
     print("Input X Interval")
@@ -188,6 +196,7 @@ def createPT(N):
     return ArrayPx, ArrayTy
 
 
+# Находим сумму квадратисчных расстояний
 def getS(ArrayTy, ArrayGy, N):
     S = 0
 
@@ -199,6 +208,7 @@ def getS(ArrayTy, ArrayGy, N):
     return S
 
 
+# Находим среднее значение суммы
 def getR(S, N):
 
     R = sqrt(S)/N
@@ -208,7 +218,7 @@ def getR(S, N):
     return R
 
 
-
+# Метод наименьших квадратов
 def leastSquares(multipliers, C):
     print("Input I")
     I = int(input())
