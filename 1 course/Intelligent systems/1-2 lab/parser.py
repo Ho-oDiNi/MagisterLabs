@@ -331,52 +331,6 @@ class Crawler:
 
         return
 
-    # def getManyURL(self):
-        # cur = self.db.cursor()
-
-    #     requestGet = f"SELECT url FROM db_urlList"
-    #     urls = cur.execute(f"{requestGet}").fetchall()
-    #     self.db.commit()
-
-    #     urlList = []
-
-    #     for i in urls:
-    #         urlList.append(i[0][8:].split('/', 1)[0])
-
-    #     sortedURLs = sorted(urlList)
-
-    #     result = []
-    #     count = []
-
-    #     for i in range(500):
-    #         count.append(1)
-
-    #     j=0
-
-    #     for i in range(len(sortedURLs)):
-    #         sortedURLs[i] = sortedURLs[i].split('http:', 1)[0]
-
-    #     for i in range(len(sortedURLs)-1):
-            
-    #         if sortedURLs[i] == sortedURLs[i+1]:
-    #             count[j-1] += 1
-                
-    #         if sortedURLs[i] != sortedURLs[i+1]:
-    #             result.append(sortedURLs[i+1])
-    #             j+=1
-
-
-    #     printedList = []
-    #     for i in range(len(result)):
-    #         printedList.append(f"{count[i]} = {result[i]}")
-
-    #     sortedPrintedList = sorted(printedList, reverse=True)
-        
-    #     for i in range(20):
-    #         print(sortedPrintedList[i])
-        # return
-
-        
 
 def main():
 
