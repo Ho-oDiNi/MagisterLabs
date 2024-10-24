@@ -194,7 +194,7 @@ class Crawler:
 
         for word in textLink:
             word_id = self.getEntryId('db_wordList', 'word', word)
-            link_word_id = self.getEntryId('db_linkWord', 'fk_link_id', link_id, 'fk_word_id', word_id)
+            self.setEntry('db_linkWord', 'fk_link_id', link_id, 'fk_word_id', word_id)
 
         self.db.commit()
 
@@ -282,7 +282,7 @@ class Crawler:
             for word in fltTextList:
                 location = location + 1
                 word_id = self.getEntryId('db_wordList', 'word', word)
-                word_location_id = self.getEntryId('db_wordLocation', 'fk_url_id', url_id, 'fk_word_id', word_id, 'location', location) 
+                self.setEntry('db_wordLocation', 'fk_url_id', url_id, 'fk_word_id', word_id, 'location', location) 
 
         return
 
@@ -354,6 +354,31 @@ class Crawler:
         request_id = cur.execute(f"{requestGet}").fetchone()
 
         return request_id[0]
+
+
+    # Вспомогательная функция для добавления записи
+    def setEntry(self, tableName, fieldNameFirst, valueFirst, fieldNameSecond = False, valueSecond = False, fieldNameThird = False, valueThird = False):
+        cur = self.db.cursor()
+
+        fieldNameList = [fieldNameSecond, fieldNameThird]
+        valueList = [valueSecond, valueThird]
+
+        requestInsert = f"INSERT INTO '{tableName}' ({fieldNameFirst}"
+
+        for i in range(len(valueList)):
+            if valueList[i]:
+                requestInsert += f", {fieldNameList[i]}"
+        requestInsert += f") VALUES ('{valueFirst}'"
+
+        for i in range(len(valueList)):
+            if valueList[i]:
+                requestInsert += f", '{valueList[i]}'"
+        requestInsert += f")"
+
+        cur.execute(f"{requestInsert}")
+        self.db.commit()
+
+        return 
 
 
     # Двумерный массив в одномерный
