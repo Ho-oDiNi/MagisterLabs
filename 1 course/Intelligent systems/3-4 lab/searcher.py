@@ -5,7 +5,7 @@ from pymystem3 import Mystem
 import os
 import re
 
-
+# Заполнить новую таблицу рейтинга страниц
 def fill_db_pageRank(db):
 
     cur = db.cursor()
@@ -20,6 +20,7 @@ def fill_db_pageRank(db):
 
     return
 
+# Создать новую таблицу рейтинга страниц
 def create_db_pageRank(db):
 
     cur = db.cursor()
@@ -57,13 +58,64 @@ class Searcher:
     def __del__(self):
         return
 
+    ############################################################
+    #########              Все о БД                    ######### 
+    ############################################################
 
+    # Получить id слова по word в табл. wordlist
+    def getWordId(self, word): 
+        cur = self.db.cursor()
+
+        requestGet = f"SELECT id FROM db_wordList WHERE word = '{word}'"
+        word_id = cur.execute(f"{requestGet}").fetchone()
+
+        if (word_id == None):
+            raise Exception('The first word were not found')
+            
+        return word_id[0]
+
+
+
+    # Получить url по url_id в табл. db_urlList
+    def getUrlName(self, url_id): 
+        cur = self.db.cursor()
+
+        requestGet = f"SELECT url FROM db_urlList WHERE id = '{url_id}'"
+            
+        url = cur.execute(f"{requestGet}").fetchone()
+
+        if (url == None):
+            raise Exception('The URL were not found')
+
+        return url[0]
+
+
+
+    # Получить score по url_id в таблице db_pageRank
+    def getPageRank(self, url_id):
+        cur = self.db.cursor()
+
+        indexed = cur.execute(f"SELECT indexed FROM db_pageRank WHERE url_id = {url_id}").fetchone()[0]
+        if(indexed==0):
+            score = 0
+        else:
+            score = cur.execute(f"SELECT score FROM db_pageRank WHERE url_id = {url_id}").fetchone()[0]
+
+        return score
+
+
+
+    ############################################################
+    #########        Все о искомых Словах              ######### 
+    ############################################################
+
+    # Считать слова
     def inputWords(self):
         print("Enter Words")
         words = input()
         return words
 
-
+    # Преобразовать считанные слова в 1 род им. паддеж 
     def filterWords(self, words):
 
         wordList = []
@@ -79,57 +131,10 @@ class Searcher:
             raise Exception('Please inter a another words')
 
         return wordList[0], wordList[1]
+    
 
 
-
-    # Возвращает id слова wordlist
-    def getWordId(self, word): 
-        cur = self.db.cursor()
-
-        requestGet = f"SELECT id FROM db_wordList WHERE word = '{word}'"
-        word_id = cur.execute(f"{requestGet}").fetchone()
-
-        if (word_id == None):
-            raise Exception('The first word were not found')
-            
-        return word_id[0]
-
-
-
-    # Получить url по url_id
-    def getUrlName(self, url_id): 
-        cur = self.db.cursor()
-
-        requestGet = f"SELECT url FROM db_urlList WHERE id = '{url_id}'"
-            
-        url = cur.execute(f"{requestGet}").fetchone()
-
-        if (url == None):
-            raise Exception('The URL were not found')
-
-        return url[0]
-
-
-
-    def printTable(self, fstWord, sndWord, DBList):
-        print("----------------------------------------")
-        print(f"url_ID\t{fstWord}\t{sndWord}")
-        
-        counter = 0
-        for row in DBList:
-            print(f"{row[0]}\t{row[1]}\t{row[2]}")
-            
-            counter += 1
-            if counter%5==0:
-                print("Stop?\nEnter y/n")
-                key = input()
-                if key.lower()=='y':
-                    break
-
-        print("----------------------------------------")
-        return
-
-    # формирует таблицу со всеми сочетаниями wordLocation слов поиска для всех urlList
+    # формирует таблицу со всеми сочетаниями искомых слов во всех url
     def getMatchRows(self, fstWord, sndWord):
         cur = self.db.cursor()
 
@@ -155,25 +160,26 @@ class Searcher:
         return newDBList
 
 
-    # Вспомогательное преобразование в тройной массив
-    def DBListToTrible(self, DBList):
+    # Форматируем текст - преобразуем в именительный паддеж 1 число, удаляем все союзы и тд
+    def textFilter(self, text):
+        textList = []
 
-        count = 0
-        for i in range(len(DBList) - 1):
-            if DBList[i][0] != DBList[i+1][0]:
-                count += 1
+        clearText = self.clearText(text)
+        lemmas = self.m.lemmatize(clearText)
 
-        newArray = [list() for _ in range(count)]
-
-        j = 0
-        for i in range(len(DBList) - 1):
-            newArray[j].append(DBList[i])
-            if DBList[i][0] != DBList[i+1][0]:
-                j += 1
-
-        return newArray
+        for lem in lemmas:
+             if (' ' not in lem) and ('\n' not in lem):
+                textList.append(lem)
 
 
+        return textList, clearText
+
+
+    ############################################################
+    #########            Все о метриках                ######### 
+    ############################################################
+
+    
     # вычисление значения метрики Частоты слов на странице
     def freqMetrika(self, DBList, fstWord, sndWord):
         freqMetr = []
@@ -196,7 +202,7 @@ class Searcher:
         return freqMetr
 
 
-
+    # вычисление значения метрики отдаленности слов между друг другом на странице
     def relPosMetrika(self, DBList):
         relPosMetr = []
 
@@ -215,7 +221,7 @@ class Searcher:
         return relPosMetr
 
 
-
+    # вычисление значения метрики отдаленности слов от начала страницы
     def absPosMetrika(self, DBList):
         absPosMetr = []
         
@@ -230,6 +236,12 @@ class Searcher:
         return absPosMetr
 
 
+    ############################################################
+    #########         Все о нормализации              ######### 
+    ############################################################
+
+
+    # Получить максимально возможное отдаление слова
     def getMaxLocation(self, url_id):
         cur = self.db.cursor()
         requestGet = f"SELECT MAX(location) FROM db_wordLocation WHERE fk_url_id = {url_id}"
@@ -242,6 +254,7 @@ class Searcher:
     # Нормализация значений метрик 
     def normalizeScores(self, absPosMetrika, relPosMetrika, freqMetrika):
 
+        # Для absPosMetrika()
         pagesM1 = []
         for page in absPosMetrika:
             url_id = page[0]
@@ -255,6 +268,7 @@ class Searcher:
 
             pagesM1.append((url_id, M1))
 
+        # Для relPosMetrika()
         pagesM2 = []
         for page in relPosMetrika:
             url_id = page[0]
@@ -265,6 +279,7 @@ class Searcher:
 
             pagesM2.append((url_id, M2))
 
+        # Для freqMetrika()
         pagesM3 = []
         for page in freqMetrika:
             url_id = page[0]
@@ -279,6 +294,7 @@ class Searcher:
             pagesM3.append((url_id, M3))
 
 
+        # Суммирование значений M1, M2, M3 и усреднение с учетом PageRank (ранга страницы)
         pageMetriks = []
         for i in range(len(pagesM1)):
             url_id = pagesM1[i][0]
@@ -297,110 +313,8 @@ class Searcher:
         return pageMetriks
 
 
-    def pageRank(self, DBList, fstWord, sndWord):
-        absPosMetrika = self.absPosMetrika(DBList)
-        relPosMetrika = self.relPosMetrika(DBList)
-        freqMetrika = self.freqMetrika(DBList, fstWord, sndWord)
-        
-        pagesMetrics = self.normalizeScores(absPosMetrika, relPosMetrika, freqMetrika)
 
-        sortedMetrics = sorted(pagesMetrics, key=lambda metric: metric[4], reverse=True)
-
-        print(f"\npagesMetrics:\n")
-        for row in sortedMetrics:
-            print(row)
-
-        return sortedMetrics
-
-
-    # Удалить все кроме букв и цифр
-    def clearText(self, text):
-        return re.sub(r'[\W ]+', ' ', text)
-
-
-    # Форматируем текст - преобразуем в именительный паддеж 1 число, удаляем все союзы и тд
-    def textFilter(self, text):
-        textList = []
-
-        clearText = self.clearText(text)
-        lemmas = self.m.lemmatize(clearText)
-
-        for lem in lemmas:
-             if (' ' not in lem) and ('\n' not in lem):
-                textList.append(lem)
-
-
-        return textList, clearText
-
-
-    def createMatch(self, fstWord, sndWord, pMain):
-
-        textList = []
-        filterTextList = []
-        clearTextList = []
-
-        for data in pMain:
-            if data.text == '':
-                continue
-            textList.append(data.text)
-
-        for i in range(len(textList)):
-            filteredText, clearText = self.textFilter(textList[i])
-
-            filterTextList.append(filteredText)
-            clearTextList.append(clearText)
-
-
-        matchList = []
-        for i in range(len(filterTextList)):
-            for j in range(len(filterTextList[i])):
-                if (filterTextList[i][j] == fstWord) or (filterTextList[i][j] == sndWord):
-                    matchList.append(clearTextList[i].split()[j])
-
-        return matchList
-
-
-
-    # создать страницу с помеченныит словами
-    def createMarkedHtmlFile(self, sortedMetrics, fstWord, sndWord):
-
-        urlList = []
-        for i in range(3):
-            urlList.append(sortedMetrics[i][5])
-
-
-        for i in range(len(urlList)):
-            print(f"Creating HTML file N{i+1}")
-            html_doc = requests.get(urlList[i]).text    # получить HTML-код страницы по текущему url    
-    
-            soup = BeautifulSoup(html_doc, "html.parser")   # использовать парсер для работа тегов
-            pMain = soup.find('div', class_='post__content').find_all(['p', 'blockquote'])
-
-            matchList = self.createMatch(fstWord, sndWord, pMain)
-            
-            newHtml = f""
-            for word in html_doc.split():
-                if word in matchList:
-                    word = f"<span style='background-color: #FFFF00'>{word}</span>"
-                newHtml += f" {word} "
-
-            with open(f"page{i}.html", 'w', encoding="utf-8") as f:
-                f.write(newHtml)    
-
-        return
-
-    def getPageRank(self, url_id):
-        cur = self.db.cursor()
-
-        indexed = cur.execute(f"SELECT indexed FROM db_pageRank WHERE url_id = {url_id}").fetchone()[0]
-        if(indexed==0):
-            score = 0
-        else:
-            score = cur.execute(f"SELECT score FROM db_pageRank WHERE url_id = {url_id}").fetchone()[0]
-
-        return score
-
-
+    # Нормализация значений ранга страниц
     def normalizeRank(self):
         cur = self.db.cursor()
 
@@ -420,7 +334,15 @@ class Searcher:
         return
 
 
-    def calculatePageRank(self, iterations=5, d = 0.85):
+
+
+    ############################################################
+    #########         Все о ранге страницы             ######### 
+    ############################################################
+
+
+    # Нахождение ранга страниц
+    def pageRank(self, iterations=5, d = 0.85):
 
         cur = self.db.cursor()
 
@@ -460,22 +382,163 @@ class Searcher:
         return
 
 
+
+
+    ############################################################
+    #########     Все о создании помеченной HTML       ######### 
+    ############################################################
+
+
+    # Нахождение пар (отфильтрованное слово - слово на странице)
+    def createMatch(self, fstWord, sndWord, pMain):
+
+        textList = []
+        filterTextList = []
+        clearTextList = []
+
+        for data in pMain:
+            if data.text == '':
+                continue
+            textList.append(data.text)
+
+        for i in range(len(textList)):
+            filteredText, clearText = self.textFilter(textList[i])
+
+            filterTextList.append(filteredText)
+            clearTextList.append(clearText)
+
+
+        matchList = []
+        for i in range(len(filterTextList)):
+            for j in range(len(filterTextList[i])):
+                if (filterTextList[i][j] == fstWord) or (filterTextList[i][j] == sndWord):
+                    matchList.append(clearTextList[i].split()[j])
+
+        return matchList
+
+
+
+    # Создать страницу с помеченныит словами
+    def createMarkedHtmlFile(self, sortedMetrics, fstWord, sndWord):
+
+        urlList = []
+        for i in range(3):
+            urlList.append(sortedMetrics[i][5])
+
+
+        for i in range(len(urlList)):
+            print(f"Creating HTML file N{i+1}")
+            html_doc = requests.get(urlList[i]).text    # получить HTML-код страницы по текущему url    
+    
+            soup = BeautifulSoup(html_doc, "html.parser")   # использовать парсер для работа тегов
+            pMain = soup.find('div', class_='post__content').find_all(['p', 'blockquote'])
+
+            matchList = self.createMatch(fstWord, sndWord, pMain)
+            
+            newHtml = f""
+            for word in html_doc.split():
+                if word in matchList:
+                    word = f"<span style='background-color: #FFFF00'>{word}</span>"
+                newHtml += f" {word} "
+
+            with open(f"page{i}.html", 'w', encoding="utf-8") as f:
+                f.write(newHtml)    
+
+        return
+
+
+
+
+
+    ############################################################
+    #########                Доп. Функции              ######### 
+    ############################################################
+
+
+    # Вспомогательное преобразование в тройной массив
+    def DBListToTrible(self, DBList):
+
+        count = 0
+        for i in range(len(DBList) - 1):
+            if DBList[i][0] != DBList[i+1][0]:
+                count += 1
+
+        newArray = [list() for _ in range(count)]
+
+        j = 0
+        for i in range(len(DBList) - 1):
+            newArray[j].append(DBList[i])
+            if DBList[i][0] != DBList[i+1][0]:
+                j += 1
+
+        return newArray
+
+
+    # Вывод таблицы 1 в консоль
+    def printTable(self, fstWord, sndWord, DBList):
+        print("----------------------------------------")
+        print(f"url_ID\t|\t{fstWord}\t|\t{sndWord}")
+        
+        counter = 0
+        for row in DBList:
+            print(f"{row[0]}\t|\t{row[1]}\t|\t{row[2]}")
+            
+            counter += 1
+            if counter%5==0:
+                print("Stop?\nEnter y/n")
+                key = input()
+                if key.lower()=='y':
+                    break
+
+        print("----------------------------------------")
+        return
+
+
+    # Удалить все кроме букв и цифр
+    def clearText(self, text):
+        return re.sub(r'[\W ]+', ' ', text)
+
+
+
+
+
+    ############################################################
+    #########            Основные Функции              ######### 
+    ############################################################
+
     # Непосредственно сам поиск
     def search(self):
 
-        # self.calculatePageRank()
-
+        # self.pageRank()
         words = self.inputWords()
         fstWord, sndWord = self.filterWords(words)
         DBList = self.getMatchRows(fstWord, sndWord)
-        sortedMetrics = self.pageRank(DBList, fstWord, sndWord)
+        sortedMetrics = self.getSortedList(DBList, fstWord, sndWord)
         self.createMarkedHtmlFile(sortedMetrics, fstWord, sndWord)
-        
-        # https://docs.google.com/document/d/1FyixYQqyNpHFWvzoPq2rhAFm3-dsXZvc/edit
 
         return  
-    
 
+
+    # Функция обертка для получения нахождения ранжированных url страниц
+    def getSortedList(self, DBList, fstWord, sndWord):
+        absPosMetrika = self.absPosMetrika(DBList)
+        relPosMetrika = self.relPosMetrika(DBList)
+        freqMetrika = self.freqMetrika(DBList, fstWord, sndWord)
+        
+        pagesMetrics = self.normalizeScores(absPosMetrika, relPosMetrika, freqMetrika)
+
+        sortedMetrics = sorted(pagesMetrics, key=lambda metric: metric[4], reverse=True)
+
+        print(f"\npagesMetrics:\n")
+        for row in sortedMetrics:
+            print(row)
+
+        return sortedMetrics
+
+
+
+
+# https://docs.google.com/document/d/1FyixYQqyNpHFWvzoPq2rhAFm3-dsXZvc/edit
 def main():
     
     searcher = Searcher()
