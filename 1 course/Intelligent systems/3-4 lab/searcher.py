@@ -6,6 +6,37 @@ import os
 import re
 
 
+def fill_db_pageRank(db):
+
+    cur = db.cursor()
+    requestGet = f"SELECT id FROM db_urlList"
+    urlList = cur.execute(requestGet).fetchall()
+
+    for url in urlList:
+        requestSet = f"INSERT INTO db_pageRank (url_id) VALUES ({url[0]})"
+        cur.execute(requestSet)
+
+    db.commit()
+
+    return
+
+def create_db_pageRank(db):
+
+    cur = db.cursor()
+    cur.execute('DROP TABLE IF EXISTS db_pageRank')
+    cur.execute("""CREATE TABLE IF NOT EXISTS db_pageRank(
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        url_id INTEGER,
+                        indexed DEFAULT 0,
+                        score REAL DEFAULT 1.0
+                    );""")
+    db.commit()
+
+    fill_db_pageRank(db)
+
+    return
+
+
 # Поисковик
 class Searcher:
 
@@ -15,6 +46,8 @@ class Searcher:
         self.path = os.path.dirname(os.path.abspath(__file__))
         self.dbFileName = os.path.join(self.path, 'crawl.db')
         self.db = sqlite3.connect(self.dbFileName)
+
+        create_db_pageRank(self.db)
 
         self.m = Mystem()
 
@@ -87,7 +120,7 @@ class Searcher:
             print(f"{row[0]}\t{row[1]}\t{row[2]}")
             
             counter += 1
-            if counter%10==0:
+            if counter%5==0:
                 print("Stop?\nEnter y/n")
                 key = input()
                 if key.lower()=='y':
@@ -255,7 +288,9 @@ class Searcher:
             M2 = pagesM2[i][1]
             M3 = pagesM3[i][1]
 
-            M4 = (M1 + M2 + M3)/3
+            pageRank = self.getPageRank(url_id)
+
+            M4 = pageRank*(M1 + M2 + M3)/3
 
             pageMetriks.append((url_id, round(M1, 2), round(M2, 2), round(M3, 2), round(M4, 4), url))
 
@@ -335,6 +370,7 @@ class Searcher:
 
 
         for i in range(len(urlList)):
+            print(f"Creating HTML file N{i+1}")
             html_doc = requests.get(urlList[i]).text    # получить HTML-код страницы по текущему url    
     
             soup = BeautifulSoup(html_doc, "html.parser")   # использовать парсер для работа тегов
@@ -353,10 +389,81 @@ class Searcher:
 
         return
 
+    def getPageRank(self, url_id):
+        cur = self.db.cursor()
+
+        indexed = cur.execute(f"SELECT indexed FROM db_pageRank WHERE url_id = {url_id}").fetchone()[0]
+        if(indexed==0):
+            score = 0
+        else:
+            score = cur.execute(f"SELECT score FROM db_pageRank WHERE url_id = {url_id}").fetchone()[0]
+
+        return score
+
+
+    def normalizeRank(self):
+        cur = self.db.cursor()
+
+        maxScore = cur.execute(f"SELECT MAX(score) FROM db_pageRank").fetchone()[0]
+        urlList = cur.execute(f"SELECT id FROM db_pageRank").fetchall()
+
+        for url in urlList:
+            mainUrl = url[0]
+            score = cur.execute(f"SELECT score FROM db_pageRank WHERE id = {mainUrl}").fetchone()[0]
+
+            normolizeScore = round((score/maxScore), 2)
+            if(normolizeScore==0):
+                normolizeScore = 0.01
+            cur.execute(f"UPDATE db_pageRank SET score = {normolizeScore} WHERE url_id = {mainUrl}")
+            self.db.commit()
+        
+        return
+
+
+    def calculatePageRank(self, iterations=5, d = 0.85):
+
+        cur = self.db.cursor()
+
+        requestGet = f"SELECT url_id FROM db_pageRank"
+        urlList = cur.execute(requestGet).fetchall()
+
+        for i in range(iterations):
+            print("Итерация %d" % (i+1))
+            
+
+            for url in urlList:
+                mainUrl = url[0]
+    
+                urlFromRefToMainList = cur.execute(f"SELECT fk_fromURL_id FROM db_linkBetweenURL WHERE fk_toURL_id = {mainUrl}").fetchall()
+
+                urlP = 1 - d
+
+                if (urlFromRefToMainList):
+                    for urlTo in urlFromRefToMainList:
+                        score = self.getPageRank(urlTo[0])
+                        if(score == 0):
+                            PRef = cur.execute(f"SELECT score FROM db_pageRank WHERE url_id = {urlTo[0]}").fetchone()[0]
+                            CRef = cur.execute(f"SELECT COUNT(id) FROM db_linkBetweenURL WHERE fk_fromURL_id = {urlTo[0]}").fetchone()[0]                            
+                            urlP += d * (PRef/CRef)
+                            cur.execute(f"UPDATE db_pageRank SET score = {round(urlP, 2)} WHERE url_id = {urlTo[0]}")
+                            cur.execute(f"UPDATE db_pageRank SET indexed = 1 WHERE url_id = {urlTo[0]}")
+                            self.db.commit()
+                        else:
+                            urlP += score
+
+                cur.execute(f"UPDATE db_pageRank SET score = {round(urlP, 2)} WHERE url_id = {mainUrl}")
+                cur.execute(f"UPDATE db_pageRank SET indexed = 1 WHERE url_id = {mainUrl}")
+                self.db.commit()
+
+            self.normalizeRank()
+       
+        return
 
 
     # Непосредственно сам поиск
     def search(self):
+
+        # self.calculatePageRank()
 
         words = self.inputWords()
         fstWord, sndWord = self.filterWords(words)
