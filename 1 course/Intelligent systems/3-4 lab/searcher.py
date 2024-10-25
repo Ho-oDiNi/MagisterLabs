@@ -509,7 +509,7 @@ class Searcher:
     # Непосредственно сам поиск
     def search(self):
 
-        # self.pageRank()
+        self.pageRank()
         words = self.inputWords()
         fstWord, sndWord = self.filterWords(words)
         DBList = self.getMatchRows(fstWord, sndWord)
