@@ -24,7 +24,7 @@ def fill_db_pageRank(db):
 def create_db_pageRank(db):
 
     cur = db.cursor()
-    cur.execute('DROP TABLE IF EXISTS db_pageRank')
+    # cur.execute('DROP TABLE IF EXISTS db_pageRank')
     cur.execute("""CREATE TABLE IF NOT EXISTS db_pageRank(
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         url_id INTEGER,
@@ -48,7 +48,7 @@ class Searcher:
         self.dbFileName = os.path.join(self.path, 'crawl.db')
         self.db = sqlite3.connect(self.dbFileName)
 
-        create_db_pageRank(self.db)
+        # create_db_pageRank(self.db)
 
         self.m = Mystem()
 
@@ -284,10 +284,10 @@ class Searcher:
         for page in freqMetrika:
             url_id = page[0]
             maxLocation = self.getMaxLocation(url_id)
-            rangeLocation = maxLocation - 1
+            rangeLocation = maxLocation - 2
 
-            fM3 = (page[1] - 1) / rangeLocation
-            sM3 = (page[2] - 1) / rangeLocation
+            fM3 = (page[1] - 2) / rangeLocation
+            sM3 = (page[2] - 2) / rangeLocation
 
             M3 = (fM3 + sM3) / 2
 
@@ -509,7 +509,7 @@ class Searcher:
     # Непосредственно сам поиск
     def search(self):
 
-        self.pageRank()
+        # self.pageRank()
         words = self.inputWords()
         fstWord, sndWord = self.filterWords(words)
         DBList = self.getMatchRows(fstWord, sndWord)
