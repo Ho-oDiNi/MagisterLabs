@@ -1,6 +1,8 @@
 #загрузка данных
-data <- read.table(file = "datafile.csv", header = TRUE, sep = ";", fileEncoding = "Windows-1251",
-                   na.strings = c("NA", "", " "))
+data <- read.table(file = 
+     "C:\\labs\\MAGISTER\\1 course\\Ktaoid\\lab1\\datafile.csv",
+     header = TRUE, sep = ";", fileEncoding = "Windows-1251",
+     na.strings = c("NA", "", " "))
 # Просмотр первых строк таблицы
 head(data)
 # Просмотр таблицы

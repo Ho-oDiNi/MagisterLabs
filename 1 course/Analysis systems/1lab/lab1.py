@@ -216,7 +216,7 @@ def getS(ArrayTy, ArrayGy, N):
 # Находим среднее значение суммы
 def getR(S, N):
 
-    R = sqrt(S)/N
+    R = sqrt(S)/sqrt(N)
     
     print(f"R = {R}")
     
@@ -246,7 +246,7 @@ def leastSquares(multipliers, C):
 
 def main():
 
-    print("\n============================ Euclid ============================")
+    print("\n============================ Least Squares ============================")
     multipliers, C = Euclid()
 
     print("\nPlease Enter any Key")

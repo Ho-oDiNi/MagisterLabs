@@ -24,7 +24,7 @@ def fill_db_pageRank(db):
 def create_db_pageRank(db):
 
     cur = db.cursor()
-    cur.execute('DROP TABLE IF EXISTS db_pageRank')
+    # cur.execute('DROP TABLE IF EXISTS db_pageRank')
     cur.execute("""CREATE TABLE IF NOT EXISTS db_pageRank(
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         url_id INTEGER,
@@ -48,7 +48,7 @@ class Searcher:
         self.dbFileName = os.path.join(self.path, 'crawl.db')
         self.db = sqlite3.connect(self.dbFileName)
 
-        create_db_pageRank(self.db)
+        # create_db_pageRank(self.db)
 
         self.m = Mystem()
 
@@ -115,6 +115,7 @@ class Searcher:
         words = input()
         return words
 
+
     # Преобразовать считанные слова в 1 род им. паддеж 
     def filterWords(self, words):
 
@@ -125,7 +126,18 @@ class Searcher:
             if ' ' not in lem:
                 wordList.append(lem)
 
-        print(wordList)
+        print(f"{wordList}")
+
+        print("\nword_id\tword")
+        print("----------------")
+        i = 0
+        for word in wordList:
+            if i == 2:
+                break
+            i+=1
+            print(f"{self.getWordId(word)}\t{word}")   
+            
+        print("----------------\n")
 
         if len(wordList) != 3:
             raise Exception('Please inter a another words')
@@ -179,28 +191,6 @@ class Searcher:
     #########            Все о метриках                ######### 
     ############################################################
 
-    
-    # вычисление значения метрики Частоты слов на странице
-    def freqMetrika(self, DBList, fstWord, sndWord):
-        freqMetr = []
-
-        cur = self.db.cursor()
-        firstWord_id = self.getWordId(fstWord)
-        sndWord_id = self.getWordId(sndWord)
-
-        for page in DBList:
-            url = page[0][0]
-
-            requestFstGet = f"SELECT COUNT(id) FROM db_wordLocation WHERE fk_url_id = {url} AND fk_word_id = {firstWord_id}"
-            requestSndGet = f"SELECT COUNT(id) FROM db_wordLocation WHERE fk_url_id = {url} AND fk_word_id = {sndWord_id}"
-
-            fstCount = cur.execute(f"{requestFstGet}").fetchone()[0]
-            sndCount = cur.execute(f"{requestSndGet}").fetchone()[0]
-
-            freqMetr.append((url, sndCount, fstCount))
-
-        return freqMetr
-
 
     # вычисление значения метрики отдаленности слов между друг другом на странице
     def relPosMetrika(self, DBList):
@@ -250,9 +240,8 @@ class Searcher:
         return maxLocation + 1
 
 
-
     # Нормализация значений метрик 
-    def normalizeScores(self, absPosMetrika, relPosMetrika, freqMetrika):
+    def normalizeScores(self, absPosMetrika, relPosMetrika):
 
         # Для absPosMetrika()
         pagesM1 = []
@@ -279,20 +268,6 @@ class Searcher:
 
             pagesM2.append((url_id, M2))
 
-        # Для freqMetrika()
-        pagesM3 = []
-        for page in freqMetrika:
-            url_id = page[0]
-            maxLocation = self.getMaxLocation(url_id)
-            rangeLocation = maxLocation - 1
-
-            fM3 = (page[1] - 1) / rangeLocation
-            sM3 = (page[2] - 1) / rangeLocation
-
-            M3 = (fM3 + sM3) / 2
-
-            pagesM3.append((url_id, M3))
-
 
         # Суммирование значений M1, M2, M3 и усреднение с учетом PageRank (ранга страницы)
         pageMetriks = []
@@ -302,13 +277,12 @@ class Searcher:
 
             M1 = pagesM1[i][1]
             M2 = pagesM2[i][1]
-            M3 = pagesM3[i][1]
 
             pageRank = self.getPageRank(url_id)
 
-            M4 = pageRank*(M1 + M2 + M3)/3
+            M3 = pageRank*(M1 + M2)/2
 
-            pageMetriks.append((url_id, round(M1, 2), round(M2, 2), round(M3, 2), round(M4, 4), url))
+            pageMetriks.append((url_id, round(M1, 2), round(M2, 2), round(M3, 4), url))
 
         return pageMetriks
 
@@ -332,7 +306,6 @@ class Searcher:
             self.db.commit()
         
         return
-
 
 
 
@@ -423,14 +396,14 @@ class Searcher:
 
         urlList = []
         for i in range(3):
-            urlList.append(sortedMetrics[i][5])
+            urlList.append(sortedMetrics[i][4])
 
 
         for i in range(len(urlList)):
             print(f"Creating HTML file N{i+1}")
             html_doc = requests.get(urlList[i]).text    # получить HTML-код страницы по текущему url    
     
-            soup = BeautifulSoup(html_doc, "html.parser")   # использовать парсер для работа тегов
+            soup = BeautifulSoup(html_doc, "html.parser")  
             pMain = soup.find('div', class_='post__content').find_all(['p', 'blockquote'])
 
             matchList = self.createMatch(fstWord, sndWord, pMain)
@@ -445,8 +418,6 @@ class Searcher:
                 f.write(newHtml)    
 
         return
-
-
 
 
 
@@ -477,7 +448,7 @@ class Searcher:
     # Вывод таблицы 1 в консоль
     def printTable(self, fstWord, sndWord, DBList):
         print("----------------------------------------")
-        print(f"url_ID\t|\t{fstWord}\t|\t{sndWord}")
+        print(f"url_ID\t|    wordLoc1\t|    wordLoc2")
         
         counter = 0
         for row in DBList:
@@ -485,6 +456,7 @@ class Searcher:
             
             counter += 1
             if counter%5==0:
+                print("----------------------------------------")
                 print("Stop?\nEnter y/n")
                 key = input()
                 if key.lower()=='y':
@@ -509,29 +481,40 @@ class Searcher:
     # Непосредственно сам поиск
     def search(self):
 
-        self.pageRank()
         words = self.inputWords()
         fstWord, sndWord = self.filterWords(words)
         DBList = self.getMatchRows(fstWord, sndWord)
-        sortedMetrics = self.getSortedList(DBList, fstWord, sndWord)
+        sortedMetrics = self.getSortedList(DBList)
         self.createMarkedHtmlFile(sortedMetrics, fstWord, sndWord)
 
         return  
 
+    
+
 
     # Функция обертка для получения нахождения ранжированных url страниц
-    def getSortedList(self, DBList, fstWord, sndWord):
+    def getSortedList(self, DBList):
+
+        # self.pageRank()
+
         absPosMetrika = self.absPosMetrika(DBList)
         relPosMetrika = self.relPosMetrika(DBList)
-        freqMetrika = self.freqMetrika(DBList, fstWord, sndWord)
         
-        pagesMetrics = self.normalizeScores(absPosMetrika, relPosMetrika, freqMetrika)
+        counter = 0
+        for page in absPosMetrika:
+            counter += 1
+        print(f"Количество уникальных страниц для запроса: {counter}")
 
-        sortedMetrics = sorted(pagesMetrics, key=lambda metric: metric[4], reverse=True)
+        pagesMetrics = self.normalizeScores(absPosMetrika, relPosMetrika)
 
-        print(f"\npagesMetrics:\n")
+        sortedMetrics = sorted(pagesMetrics, key=lambda metric: metric[3], reverse=True)
+
+        print("----------------------------------------------------------------------------------------------------------------------------------")
+        print(f"url_ID\tM1\tM2\tM3\tURL_text")
         for row in sortedMetrics:
-            print(row)
+            print(f"{row[0]}\t{row[1]}\t{row[2]}\t{round(row[3]*10, 2)}\t{row[4]}")
+        print("----------------------------------------------------------------------------------------------------------------------------------\n")
+
 
         return sortedMetrics
 
