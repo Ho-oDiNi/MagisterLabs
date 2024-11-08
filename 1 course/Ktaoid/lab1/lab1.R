@@ -1,5 +1,6 @@
 #загрузка данных
-data <- read.table(file = "datafile.csv", header = TRUE, sep = ";", fileEncoding = "Windows-1251",
+# Ctrl+Shift+S
+data <- read.table(file = "C:\\labs\\MAGISTER\\1 course\\Ktaoid\\lab1\\datafile.csv", header = TRUE, sep = ";", fileEncoding = "Windows-1251",
                    na.strings = c("NA", "", " "))
 # Просмотр первых строк таблицы
 head(data)
@@ -271,6 +272,5 @@ corrplot(cor_matrix,
          tl.col = "black",         # цвет подписей
          tl.srt = 30,              # уменьшен угол поворота подписей
          number.cex = 0.6,         # уменьшен размер шрифта коэффициентов
-         diag = FALSE)             # убирает значения на диагонали
-
-
+         diag = FALSE             # убирает значения на диагонали
+         )

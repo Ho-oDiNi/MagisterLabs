@@ -4,7 +4,7 @@ from numpy.linalg import inv
 import matplotlib.pyplot as plt
 import random
 # Вывод уравнения на экран
-def printEquation(a, typeEq, M, N):
+def printEquation(a, typeEq, N, M = 0):
     if (typeEq):
         equation = f"y(x) = {a[0]} + {a[1]}cos(π/{M}*{N})"
     else:
@@ -38,11 +38,12 @@ def createEquation():
 
         a[0], a[1] = [ int(i) for i in input().split()]
 
+        M = 0
         if(typeEq):
             print(f"Input Value for M")
             M = int(input())
 
-        if (printEquation(a, typeEq, M, N)):
+        if (printEquation(a, typeEq, N, M)):
             break
 
 

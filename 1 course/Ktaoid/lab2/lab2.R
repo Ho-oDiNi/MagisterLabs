@@ -3,7 +3,7 @@ library(forecast)
 library(tseries)
 
 # Загрузка данных
-data <- read.csv("data.csv", header=TRUE, sep=";", check.names=F, fileEncoding="Windows-1251")
+data <- read.csv("C:\\labs\\MAGISTER\\1 course\\Ktaoid\\lab2\\data.csv", header=TRUE, sep=";", check.names=F, fileEncoding="Windows-1251")
 tsData <- ts(data[15], frequency=12) # Загрузка 12 варианта временного ряда
 
 # 2.2 Построение графика временного ряда и его декомпозиция
@@ -20,9 +20,9 @@ Pacf(tsData, main="PACF Временного ряда")
 t <- 1:length(tsData)
 y <- as.numeric(tsData)
 data1 <- data.frame(y=y, t=t)
-model1 <- lm(y ~ t, data=data1) # Линейная регрессия
+model1 <- nls(y ~ a0+a1*t+a2*t^2, data=data1, start = c(a0=1,a1=1,a2=1)) # Линейная регрессия
 summary_model1 <- summary(model1)
-print(summary_model1)
+
 
 # Оценка точности модели
 accuracy_model1 <- accuracy(fitted(model1), tsData)
@@ -52,19 +52,24 @@ cat("Коэффициент детерминации (R-squared):", r_squared, "
 
 # График исходного ряда с наложением тренда
 plot(t, y, main="Исходный ряд с трендовой моделью (Модель 1)")
-abline(model1, col="red")
+lines(t, predict(model1), col="red")
 
 # Остатки Модели 1 и их анализ
 residuals_model1 <- residuals(model1)
 plot(residuals_model1, main="Остатки Модели 1")
 Acf(residuals_model1, main="ACF остатков Модели 1")
 Pacf(residuals_model1, main="PACF остатков Модели 1")
-spec.pgram(residuals_model1, detrend=FALSE, log="no", main="Периодограмма остатков Модели 1")
+residuals_model12 <- ts(residuals_model1, frequency = 12)
+spec.pgram(residuals_model12, detrend=FALSE, log="no", main="Периодограмма остатков Модели 1")
 
 # 2.3.2 Идентификация сезонной составляющей (Модель 2)
 # Добавляем сезонную составляющую
-model2 <- tslm(tsData ~ trend + season)
+# model2 <- tslm(tsData ~ trend + season)
+model2 <- nls(y ~ a0+a1*t+a2*t^2 + c0*sin(2*pi*t/12) + b0*cos(2*pi*t/12)
+              + c1* sin(2*pi*t/6) + b1*cos(2*pi*t/6),
+              data=data1, start = c(a0=1,a1=1,a2=1,c0=1,b0=1,c1=1,b1=1))
 summary_model2 <- summary(model2)
+plot(fitted(model2), type = 'l')
 print(summary_model2)
 
 min_error <- min(residuals(model2))
@@ -94,6 +99,7 @@ print("Точность Модели 2:")
 print(accuracy_model2)
 
 # График исходного ряда с наложением тренда и сезонной составляющей
+
 plot(tsData, main="Исходный ряд с трендовой и сезонной моделью (Модель 2)")
 lines(fitted(model2), col="blue")
 
