@@ -1,27 +1,27 @@
 {
-    "id": "70808835",
-    "path": "C:/Programs/Ktaoid/lab2/lab2.R",
-    "project_path": "lab2.R",
+    "id": "E257A78D",
+    "path": "C:/Users/Sollevar/Desktop/MagisterLabs/1 course/Ktaoid/lab1/lab1.R",
+    "project_path": "lab1.R",
     "type": "r_source",
-    "hash": "2062431666",
+    "hash": "2376902481",
     "contents": "",
     "dirty": false,
-    "created": 1730378210751.0,
+    "created": 1728809762627.0,
     "source_on_save": false,
     "relative_order": 1,
     "properties": {
         "tempName": "Untitled1",
         "source_window_id": "",
         "Source": "Source",
-        "cursorPosition": "125,53",
-        "scrollLine": "108"
+        "cursorPosition": "163,40",
+        "scrollLine": "157"
     },
     "folds": "",
-    "lastKnownWriteTime": 1730879800,
+    "lastKnownWriteTime": 1731130478,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1730879800581,
+    "last_content_update": 1731130478,
     "read_only": false,
     "read_only_alternatives": []
 }

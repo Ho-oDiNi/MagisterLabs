@@ -1,8 +1,0 @@
-print("hello")
-install.packages()
-print(data)
-clear
-cls
-View(data)
-function (..., list = character(), package = NULL, lib.loc = NULL,
-verbose = getOption("verbose"), envir = .GlobalEnv, overwrite = TRUE)
