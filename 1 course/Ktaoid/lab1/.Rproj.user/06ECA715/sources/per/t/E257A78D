@@ -3,7 +3,7 @@
     "path": "C:/Users/Sollevar/Desktop/MagisterLabs/1 course/Ktaoid/lab1/lab1.R",
     "project_path": "lab1.R",
     "type": "r_source",
-    "hash": "2376902481",
+    "hash": "1809098903",
     "contents": "",
     "dirty": false,
     "created": 1728809762627.0,
@@ -14,14 +14,14 @@
         "source_window_id": "",
         "Source": "Source",
         "cursorPosition": "163,40",
-        "scrollLine": "157"
+        "scrollLine": "154"
     },
     "folds": "",
-    "lastKnownWriteTime": 1731130478,
+    "lastKnownWriteTime": 1731415204,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1731130478,
+    "last_content_update": 1731415204,
     "read_only": false,
     "read_only_alternatives": []
 }

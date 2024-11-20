@@ -1,6 +1,5 @@
 #загрузка данных
-# Ctrl+Shift+S
-data <- read.table(file = "C:\\labs\\MAGISTER\\1 course\\Ktaoid\\lab1\\datafile.csv", header = TRUE, sep = ";", fileEncoding = "Windows-1251",
+data <- read.table(file = "datafile.csv", header = TRUE, sep = ";", fileEncoding = "Windows-1251",
                    na.strings = c("NA", "", " "))
 # Просмотр первых строк таблицы
 head(data)
@@ -12,6 +11,11 @@ names(data)
 data$возраст
 # подвыборка возраста
 subset(data, data$возраст > 50)
+# меняем с int на char
+data$X.п.п <- as.character(data$X.п.п)
+data$группа <- as.character(data$группа)
+data$пол <- as.character(data$пол)
+data$профессиональная.специализация..насколько.тесно.профессия.клиента.связана.с.Интернет. <- as.character(data$профессиональная.специализация..насколько.тесно.профессия.клиента.связана.с.Интернет.)
 # структура данных
 str(data)
 # Просмотр статистики по данным
@@ -42,86 +46,208 @@ plot(data$возраст, data$средний.доход.в.месяц,
      xlab = "Возраст", ylab = "Средний доход в месяц", 
      main = "Диаграмма рассеяния: Возраст vs Средний доход")
 
-# Радиальная диаграмма для качественного признака packages(plotrix)
+# Радиальная диаграмма для качественного признака
 survey_table <- table(data$степень.активности..участие.в.Интернет.опросах....качественная.оценка, useNA = "no")
 print(survey_table)
-library(plotrix)
-survey_values <- as.numeric(survey_table)
-survey_labels <- names(survey_table)
-# Построение радиальной диаграммы
-radial.plot(survey_values, 
-            labels = survey_labels, 
-            main = "Радиальная диаграмма по степени активности в опросах",
-            radial.lim = c(0, max(survey_values)),  # Установка пределов радиуса
-            rp.type = "p",
-            line.col = "blue",    # Цвет линий
-            point.col = "red",    # Цвет точек
-            show.grid.labels = TRUE)  # Показывать подписи сетки
 
-# Категориальная радиальная диаграмма по групповым переменным
-library(plotrix)
-# Создаем таблицу частот по профессиональной специализации и полу
-category_table <- table(data$профессиональная.специализация..насколько.тесно.профессия.клиента.связана.с.Интернет., 
-                        data$пол)
-category_values_male <- as.numeric(category_table[, "1"])
-category_values_female <- as.numeric(category_table[, "2"])
-# Определение меток для осей (профессиональная специализация)
-labels <- rownames(category_table)
-# Построение радиальной диаграммы с учетом групповой переменной
-radial.plot(category_values_male, 
-            labels = labels, 
-            main = "Категориальная радиальная диаграмма по профессиональной специализации и полу",
-            radial.lim = c(0, max(category_values_male, category_values_female)),  # Установка пределов радиуса
-            rp.type = "p",  # Тип графика "p" для точек
-            line.col = "blue",   
-            point.col = "blue")  
-# Добавляем данные для женщин на тот же график
-radial.plot(category_values_female, 
-            add = TRUE,  # Добавляем к существующему графику
-            line.col = "red",    
-            point.col = "red")   
-legend("topright", legend = c("Мужской", "Женский"), col = c("blue", "red"), lty = 1, pch = 16)
+# Вычисление значений и меток для круговой диаграммы
+survey_values <- as.vector(survey_table)
+survey_labels <- names(survey_table)
+percent_labels <- paste(survey_labels, "(", round(100 * survey_values / sum(survey_values), 1), "%)", sep = "")
+
+# Круговая диаграмма
+pie(survey_values, 
+    labels = percent_labels, 
+    main = "Круговая диаграмма по степени активности в опросах",
+    col = rainbow(length(survey_values)))
+
+# Категориальная радиальная диаграмма
+par(mfrow = c(2, 3))
+
+# 1. Степень активности по полу
+activity_by_gender <- table(data$степень.активности..участие.в.Интернет.опросах....качественная.оценка, data$пол)
+
+# Для мужчин (пол = 1)
+activity_male <- activity_by_gender[, "1"]
+labels_male <- names(activity_male)
+percent_labels_male <- paste(labels_male, "(", round(100 * activity_male / sum(activity_male), 1), "%)", sep = "")
+pie(activity_male, labels = percent_labels_male, main = "Степень активности - Мужчины", col = rainbow(length(activity_male)), border = "white")
+
+# Для женщин (пол = 2)
+activity_female <- activity_by_gender[, "2"]
+labels_female <- names(activity_female)
+percent_labels_female <- paste(labels_female, "(", round(100 * activity_female / sum(activity_female), 1), "%)", sep = "")
+pie(activity_female, labels = percent_labels_female, main = "Степень активности - Женщины", col = rainbow(length(activity_female)), border = "white")
+
+# 2. Группа по полу
+group_by_gender <- table(data$группа, data$пол)
+
+# Для группы 1 (мужчины и женщины)
+group_male <- group_by_gender[,"1"]
+group_female <- group_by_gender[,"2"]
+
+# Круговая диаграмма для мужчин по группе
+percent_labels_group_male <- paste(names(group_male), "(", round(100 * group_male / sum(group_male), 1), "%)", sep = "")
+pie(group_male, labels = percent_labels_group_male, main = "Группа - Мужчины", col = c("lightblue", "lightgreen"), border = "white")
+
+# Круговая диаграмма для женщин по группе
+percent_labels_group_female <- paste(names(group_female), "(", round(100 * group_female / sum(group_female), 1), "%)", sep = "")
+pie(group_female, labels = percent_labels_group_female, main = "Группа - Женщины", col = c("lightblue", "lightgreen"), border = "white")
+
+# 3. Профессиональная специализация по полу
+specialization_by_gender <- table(data$профессиональная.специализация..насколько.тесно.профессия.клиента.связана.с.Интернет., data$пол)
+
+# Для мужчин (пол = 1)
+specialization_male <- specialization_by_gender[, "1"]
+labels_male_specialization <- names(specialization_male)
+percent_labels_specialization_male <- paste(labels_male_specialization, "(", round(100 * specialization_male / sum(specialization_male), 1), "%)", sep = "")
+pie(specialization_male, labels = percent_labels_specialization_male, main = "Специализация - Мужчины", col = rainbow(length(specialization_male)), border = "white")
+
+# Для женщин (пол = 2)
+specialization_female <- specialization_by_gender[, "2"]
+labels_female_specialization <- names(specialization_female)
+percent_labels_specialization_female <- paste(labels_female_specialization, "(", round(100 * specialization_female / sum(specialization_female), 1), "%)", sep = "")
+pie(specialization_female, labels = percent_labels_specialization_female, main = "Специализация - Женщины", col = rainbow(length(specialization_female)), border = "white")
+
+par(mfrow = c(1, 1))
 
 
 # Категориальная столбиковая диаграмма для количественного признака в зависимости от групповой переменной
-# Построение столбиковой диаграммы среднего дохода по полу
-barplot(tapply(data$средний.доход.в.месяц, data$пол, mean, na.rm = TRUE),
+# Настройка для отображения 2 строк и 2 столбцов графиков
+par(mfrow = c(2, 2))  
+# 1. Средний доход по полу (мужчины, женщины)
+average_income_by_gender <- tapply(data$средний.доход.в.месяц, data$пол, mean, na.rm = TRUE)
+barplot(average_income_by_gender, 
+        beside = TRUE, 
+        col = c("lightblue", "lightpink"), 
+        names.arg = c("Мужчины", "Женщины"),
         main = "Средний доход по полу", 
-        xlab = "Пол", 
-        ylab = "Средний доход в месяц",
-        names.arg = c("Мужчины", "Женщины"),  # Если 1 - мужчины, 2 - женщины
-        col = c("skyblue", "lightpink"),  
-        ylim = c(0, max(tapply(data$средний.доход.в.месяц, data$пол, mean, na.rm = TRUE)) * 1.1))  
+        ylab = "Средний доход в месяц", 
+        ylim = c(0, max(average_income_by_gender)),  # Для более четкого отображения
+        border = "white")
+# 2. Средний доход по группе (1, 2)
+average_income_by_group <- tapply(data$средний.доход.в.месяц, data$группа, mean, na.rm = TRUE)
+barplot(average_income_by_group, 
+        beside = TRUE, 
+        col = c("lightgreen", "lightcoral"), 
+        names.arg = c("Группа 1", "Группа 2"),
+        main = "Средний доход по группе", 
+        ylab = "Средний доход в месяц", 
+        ylim = c(0, max(average_income_by_group)), 
+        border = "white")
 
-#Диаграмма размаха для количественного признака (возраст в зависимости от пола):
-boxplot(возраст ~ пол, data = data, 
-        main = "Диаграмма размаха возраста по полу", 
-        xlab = "Пол", 
-        ylab = "Возраст", 
-        names = c("Мужчины", "Женщины"),  # Если 1 - мужчины, 2 - женщины
-        col = c("skyblue", "lightpink"))  # Цвет для каждого пола
+# 3. Средний доход по профессиональной специализации (1, 2, 3, 4)
+average_income_by_specialization <- tapply(data$средний.доход.в.месяц, 
+                                           data$профессиональная.специализация..насколько.тесно.профессия.клиента.связана.с.Интернет., 
+                                           mean, na.rm = TRUE)
+barplot(average_income_by_specialization, 
+        beside = TRUE, 
+        col = c("lightblue", "lightgreen", "lightyellow", "lightpink"), 
+        names.arg = c("Специализация 1", "Специализация 2", "Специализация 3", "Специализация 4"),
+        main = "Средний доход по специализации", 
+        ylab = "Средний доход в месяц", 
+        ylim = c(0, max(average_income_by_specialization)),
+        border = "white")
+# 4. Средний доход по степени активности в опросах (высокая, низкая, средняя)
+average_income_by_activity <- tapply(data$средний.доход.в.месяц, 
+                                     data$степень.активности..участие.в.Интернет.опросах....качественная.оценка, 
+                                     mean, na.rm = TRUE)
+barplot(average_income_by_activity, 
+        beside = TRUE, 
+        col = c("lightblue", "lightgreen", "lightcoral"), 
+        names.arg = c("высокая", "средняя", "низкая"),
+        main = "Средний доход по активности", 
+        ylab = "Средний доход в месяц", 
+        ylim = c(0, max(average_income_by_activity)),
+        border = "white")
 
-
-#Гистограммы для количественных признаков:
-# Настройка области графиков для отображения двух графиков в одном окне
-par(mfrow = c(1, 2))
-# Построение первой гистограммы для возраста
-hist(data$возраст, 
-     main = "Гистограмма возраста", 
-     xlab = "Возраст",
-     col = "lightblue",     
-     breaks = 10)     
-# Построение второй гистограммы для среднего дохода в месяц
-hist(data$средний.доход.в.месяц, 
-     main = "Гистограмма дохода", 
-     xlab = "Средний доход в месяц",
-     col = "lightgreen",    
-     breaks = 10)           
-# Возвращаем настройки к одному графику на окно
+# Возвращаем настройку графиков на стандартное отображение (1 график)
 par(mfrow = c(1, 1))
 
+
+# Диаграмма размаха для возраста в зависимости от пола
+par(mfrow = c(2, 2))  
+boxplot(возраст ~ пол, 
+        data = data, 
+        main = "Диаграмма размаха: Возраст от пола", 
+        ylab = "Возраст", 
+        xlab = "Пол", 
+        col = c("lightblue", "lightpink"),  # Цвета для мужчин и женщин
+        border = "black")
+
+# Диаграмма размаха для возраста в зависимости от группы (1, 2)
+boxplot(возраст ~ группа, 
+        data = data, 
+        main = "Диаграмма размаха: Возраст от группы", 
+        ylab = "Возраст", 
+        xlab = "Группа", 
+        col = c("lightgreen", "lightyellow"),  # Цвета для группы 1 и 2
+        border = "black")
+
+# Диаграмма размаха для возраста в зависимости от профессиональной специализации
+boxplot(возраст ~ профессиональная.специализация..насколько.тесно.профессия.клиента.связана.с.Интернет., 
+        data = data, 
+        main = "Диаграмма размаха: Возраст от специализации", 
+        ylab = "Возраст", 
+        xlab = "Профессиональная специализация", 
+        col = rainbow(4),  # 4 цвета для 4 специализаций
+        border = "black")
+
+# Диаграмма размаха для возраста в зависимости от степени активности в опросах
+boxplot(возраст ~ степень.активности..участие.в.Интернет.опросах....качественная.оценка, 
+        data = data, 
+        main = "Диаграмма размаха: Возраст от степени активности", 
+        ylab = "Возраст", 
+        xlab = "Степень активности", 
+        col = c("lightblue", "lightgreen", "lightcoral"),  # Цвета для высокой, средней и низкой активности
+        border = "black")
+par(mfrow = c(1, 1))
+
+# Настройка области графиков для отображения пяти графиков (2 строки и 3 столбца)
+par(mfrow = c(2, 3))  # 2 строки и 3 столбца
+
+# Гистограммы для количественных признаков
+# Гистограмма для возраста
+hist(data$возраст, 
+     main = "Гистограмма возраста", 
+     xlab = "Возраст", 
+     col = "lightblue",     
+     breaks = 10) 
+
+# Гистограмма для среднего дохода в месяц
+hist(data$средний.доход.в.месяц, 
+     main = "Гистограмма дохода", 
+     xlab = "Средний доход в месяц", 
+     col = "lightgreen",    
+     breaks = 10)  
+
+# Гистограмма для стажа работы
+hist(data$стаж.работы.в.сети.Интернет, 
+     main = "Гистограмма стажа работы", 
+     xlab = "Стаж работы", 
+     col = "lightcoral",     
+     breaks = 10)  
+
+# Гистограмма для количества просмотренных страниц
+hist(data$среднее.количество.просматривемых.страниц.в.месяц, 
+     main = "Гистограмма просмотров", 
+     xlab = "Количество просмотренных страниц", 
+     col = "lightyellow",     
+     breaks = 10)  
+
+# Гистограмма для степени активности (бальная)
+hist(data$степень.активности..участие.в.Интернет.опросах....балльная.оценка, 
+     main = "Гистограмма активности (бальная)", 
+     xlab = "Степень активности", 
+     col = "lightpink",     
+     breaks = 10)  
+
+# Возвращаем настройки к одному графику на окно
+par(mfrow = c(1, 1)) 
+
+
 # Матричный график для количественных переменных
-pairs(~ возраст + средний.доход.в.месяц + стаж.работы.в.сети.Интернет, 
+pairs(~ возраст + средний.доход.в.месяц + стаж.работы.в.сети.Интернет + среднее.количество.просматривемых.страниц.в.месяц + степень.активности..участие.в.Интернет.опросах....балльная.оценка, 
       data = data, 
       main = "Матричный график количественных переменных", 
       pch = 21,                  
@@ -131,146 +257,134 @@ pairs(~ возраст + средний.доход.в.месяц + стаж.ра
 #Корреляционный анализ
 
 # Фишера
-# Подмножества для первой и второй группы
-data_group1 <- subset(data, группа == 1)
-data_group2 <- subset(data, группа == 2)
+# Переменные для анализа
+var <- c('пол', 'степень.активности..участие.в.Интернет.опросах....качественная.оценка', 'профессиональная.специализация..насколько.тесно.профессия.клиента.связана.с.Интернет.')
 
-# Создание таблиц сопряжённости для первой группы
-table_data_group1 <- table(data_group1$пол, data_group1$степень.активности..участие.в.Интернет.опросах....качественная.оценка)
-chi_test_group1 <- chisq.test(table_data_group1)
-fisher_test_group1 <- fisher.test(table_data_group1)
+# Функция для обработки данных и выполнения тестов
+perform_tests <- function(data_group, var) {
+  for (i in 1:(length(var) - 1)) {
+    for (j in (i + 1):length(var)) {
+      # Выбираем пары переменных
+      var1 <- var[i]
+      var2 <- var[j]
+      
+      # Создание таблицы сопряжённости
+      table_data <- table(data_group[[var1]], data_group[[var2]])
+      
+      # Выполнение тестов χ² и Фишера
+      chi_test <- chisq.test(table_data)
+      fisher_test <- fisher.test(table_data)
+      
+      # Вывод результатов
+      print(paste("Анализ переменных:", var1, "и", var2))
+      print("Тест χ²:")
+      print(chi_test)
+      print("Тест Фишера:")
+      print(fisher_test)
+    }
+  }
+}
 
-# Создание таблиц сопряжённости для второй группы
-table_data_group2 <- table(data_group2$пол, data_group2$степень.активности..участие.в.Интернет.опросах....качественная.оценка)
-chi_test_group2 <- chisq.test(table_data_group2)
-fisher_test_group2 <- fisher.test(table_data_group2)
+# Перебор по группам и выполнение тестов для первой и второй группы
+print("Результаты для первой группы")
+perform_tests(data_group1, var)
 
-# Вывод результатов для первой группы
-print("Тест χ² для первой группы")
-print(chi_test_group1)
-print('Тест Фишера для первой группы')
-print(fisher_test_group1)
+print("Результаты для второй группы")
+perform_tests(data_group2, var)
 
-# Вывод результатов для второй группы
-print("Тест χ² для второй группы")
-print(chi_test_group2)
-print('Тест Фишера для второй группы')
-print(fisher_test_group2)
+
+
 
 # ANOVA и критерий Краскела-Уоллиса
-# влияния пола на средний доход
+anova_result <- aov(возраст ~ пол, data = data)
+summary(anova_result)
 anova_result <- aov(средний.доход.в.месяц ~ пол, data = data)
 summary(anova_result)
+anova_result <- aov(стаж.работы.в.сети.Интернет ~ пол, data = data)
+summary(anova_result)
+anova_result <- aov(среднее.количество.просматривемых.страниц.в.месяц ~ пол, data = data)
+summary(anova_result)
+anova_result <- aov(степень.активности..участие.в.Интернет.опросах....балльная.оценка ~ пол, data = data)
+summary(anova_result)
+
+kruskal_test <- kruskal.test(возраст ~ пол, data = data)
+print(kruskal_test)
+kruskal_test <- kruskal.test(средний.доход.в.месяц ~ пол, data = data)
+print(kruskal_test)
+kruskal_test <- kruskal.test(стаж.работы.в.сети.Интернет ~ пол, data = data)
+print(kruskal_test)
 kruskal_test <- kruskal.test(среднее.количество.просматривемых.страниц.в.месяц ~ пол, data = data)
 print(kruskal_test)
+kruskal_test <- kruskal.test(степень.активности..участие.в.Интернет.опросах....балльная.оценка ~ пол, data = data)
+print(kruskal_test)
 
-# коэффициенты корреляции Пирсона, Спирмена, Кендалла
-# Корреляция Пирсона для первой группы
-cor_pearson_group1 <- cor(data_group1$возраст, data_group1$средний.доход.в.месяц, method = "pearson")
-
-# Корреляция Пирсона для второй группы
-cor_pearson_group2 <- cor(data_group2$возраст, data_group2$средний.доход.в.месяц, method = "pearson")
-
-# Корреляция Спирмена для первой группы
-cor_spearman_group1 <- cor(data_group1$стаж.работы.в.сети.Интернет, data_group1$средний.доход.в.месяц, method = "spearman")
-
-# Корреляция Спирмена для второй группы
-cor_spearman_group2 <- cor(data_group2$стаж.работы.в.сети.Интернет, data_group2$средний.доход.в.месяц, method = "spearman")
-
-# Корреляция Кендалла для первой группы
-cor_kendall_group1 <- cor(data_group1$степень.активности..участие.в.Интернет.опросах....балльная.оценка, data_group1$возраст, method = "kendall")
-
-# Корреляция Кендалла для второй группы
-cor_kendall_group2 <- cor(data_group2$степень.активности..участие.в.Интернет.опросах....балльная.оценка, data_group2$возраст, method = "kendall")
-
-# Вывод результатов
-print("Корреляция Пирсона для первой группы")
-print(cor_pearson_group1)
-print("Корреляция Пирсона для второй группы")
-print(cor_pearson_group2)
-
-print("Корреляция Спирмена для первой группы")
-print(cor_spearman_group1)
-print("Корреляция Спирмена для второй группы")
-print(cor_spearman_group2)
-
-print("Корреляция Кендалла для первой группы")
-print(cor_kendall_group1)
-print("Корреляция Кендалла для второй группы")
-print(cor_kendall_group2)
-
-#частный коэффициент корреляции
-# Подмножества для первой и второй группы
+# Загрузка необходимых библиотек
+library(ggm)
+library(corrplot)
 data_group1 <- subset(data, группа == 1)
 data_group2 <- subset(data, группа == 2)
-library(ppcor)
-# Рассчитываем матрицу корреляции Пирсона для первой группы
-cor_matrix_group1 <- cor(data_group1[, c("возраст", "средний.доход.в.месяц", "стаж.работы.в.сети.Интернет")], use = "complete.obs")
-# Находим пару переменных с максимальным модулем коэффициента корреляции
-max_corr_vars_group1 <- which(abs(cor_matrix_group1) == max(abs(cor_matrix_group1[upper.tri(cor_matrix_group1)])), arr.ind = TRUE)
-# Повторяем для второй группы
-cor_matrix_group2 <- cor(data_group2[, c("возраст", "средний.доход.в.месяц", "стаж.работы.в.сети.Интернет")], use = "complete.obs")
-max_corr_vars_group2 <- which(abs(cor_matrix_group2) == max(abs(cor_matrix_group2[upper.tri(cor_matrix_group2)])), arr.ind = TRUE)
-# Частный коэффициент корреляции для первой группы
-var1_group1 <- names(data_group1)[max_corr_vars_group1[1]]
-var2_group1 <- names(data_group1)[max_corr_vars_group1[2]]
-pcor_result_group1 <- pcor.test(data_group1[[var1_group1]], data_group1[[var2_group1]], data_group1$стаж.работы.в.сети.Интернет)
-# Частный коэффициент корреляции для второй группы
-var1_group2 <- names(data_group2)[max_corr_vars_group2[1]]
-var2_group2 <- names(data_group2)[max_corr_vars_group2[2]]
-pcor_result_group2 <- pcor.test(data_group2[[var1_group2]], data_group2[[var2_group2]], data_group2$стаж.работы.в.сети.Интернет)
-# Вывод результатов
-print("Частный коэффициент корреляции для первой группы")
-print(pcor_result_group1)
-print("Частный коэффициент корреляции для второй группы")
-print(pcor_result_group2)
+# Создание таблиц с числовыми переменными для первой и второй групп
+M1 <- data_group1[, unlist(lapply(data_group1, is.numeric))]
+M2 <- data_group2[, unlist(lapply(data_group2, is.numeric))]
+
+
+# Коэффициенты корреляции для первой группы
+N1_group1 <- cor(M1, use="pairwise.complete.obs")  # Коэффициенты Пирсона
+N2_group1 <- cor(M1, use="pairwise.complete.obs", method="spearman")  # Коэффициенты Спирмена
+N3_group1 <- cor(M1, use="pairwise.complete.obs", method="kendall")  # Коэффициенты Кендалла
+
+# Коэффициенты корреляции для второй группы
+N1_group2 <- cor(M2, use="pairwise.complete.obs")  # Коэффициенты Пирсона
+N2_group2 <- cor(M2, use="pairwise.complete.obs", method="spearman")  # Коэффициенты Спирмена
+N3_group2 <- cor(M2, use="pairwise.complete.obs", method="kendall")  # Коэффициенты Кендалла
+
+# Вывод коэффициентов корреляции
+print("Корреляция Пирсона для первой группы")
+print(N1_group1)
+
+print("Корреляция Спирмена для первой группы")
+print(N2_group1)
+
+print("Корреляция Кендалла для первой группы")
+print(N3_group1)
+
+print("Корреляция Пирсона для второй группы")
+print(N1_group2)
+
+print("Корреляция Спирмена для второй группы")
+print(N2_group2)
+
+print("Корреляция Кендалла для второй группы")
+print(N3_group2)
+
+# Графическое представление для первой группы
+col <- colorRampPalette(c("#BB4444", "#EE9988", "#FFFFFF", "#77AADD", "#4477AA"))
+corrplot(N1_group1, method="color", col=NULL, 
+         type="upper", order="hclust", 
+         addCoef.col = "black", tl.col="black", tl.srt=45,
+         sig.level = 0.01, insig = "blank", diag=FALSE)
+
+# Графическое представление для второй группы
+corrplot(N1_group2, method="color", col=NULL, 
+         type="upper", order="hclust", 
+         addCoef.col = "black", tl.col="black", tl.srt=45,
+         sig.level = 0.01, insig = "blank", diag=FALSE)
+
+library(ggm)
+# Для расчета частных коэффициентов корреляции
+pcor_group1 <- pcor(c(3, 4, 1, 2, 5), cov(M1))
+pcor_group2 <- pcor(c(3, 4, 1, 2, 5), cov(M2))
+
+# Вывод частных коэффициентов
+print("Частный коэффициент корреляции для первой группы:")
+print(pcor_group1)
+
+print("Частный коэффициент корреляции для второй группы:")
+print(pcor_group2)
+
 
 library(GGally)
-library(psych)
-# Выбор количественных переменных
-quant_vars <- data[, c("возраст", "средний.доход.в.месяц", "стаж.работы.в.сети.Интернет", 
-                       "среднее.количество.просматривемых.страниц.в.месяц", 
-                       "степень.активности..участие.в.Интернет.опросах....балльная.оценка")]
-
-# Рассчёт матрицы коэффициентов корреляции Пирсона
-cor_matrix <- cor(quant_vars, use = "complete.obs", method = "pearson")
-
-# Функция для теста значимости корреляции (p-value) для каждой пары переменных
-cor_test <- corr.test(quant_vars, method = "pearson")
-
-# Вывод матрицы корреляции
-print("Матрица коэффициентов корреляции:")
-print(cor_matrix)
-
-# Вывод p-значений
-print("Матрица значимости (p-values):")
-print(cor_test$p)
-
-# Построение графика корреляций с помощью ggpairs (включает распределение и графики корреляций)
-ggpairs(quant_vars, 
-        upper = list(continuous = wrap("cor", size = 3, color = "blue")), # корреляции в верхней треугольной части
-        lower = list(continuous = "smooth"), # линейный тренд в нижней части
-        diag = list(continuous = "densityDiag")) # плотность распределений на диагонали
+ggpairs(data, columns = 2:10, aes(color = группа,alpha = 0.5))
 
 
-library(corrplot)
 
-# Подготовка данных: выбор количественных переменных
-quant_vars <- data[, sapply(data, is.numeric)]
-
-# Расчёт матрицы коэффициентов корреляции Пирсона
-cor_matrix <- cor(quant_vars, use = "complete.obs", method = "pearson")
-
-# Устанавливаем параметры графического устройства перед построением графика
-par(mar = c(1, 1, 1, 1))  # Уменьшаем отступы для графика
-
-# Визуализация корреляционной матрицы с использованием corrplot
-corrplot(cor_matrix, 
-         method = "color",        # метод цветового заполнения
-         col = colorRampPalette(c("#B44444", "#FFFFFF", "#77AADD"))(200), # цветовая палитра
-         addCoef.col = "black",    # цвет значений коэффициентов
-         tl.col = "black",         # цвет подписей
-         tl.srt = 30,              # уменьшен угол поворота подписей
-         number.cex = 0.6,         # уменьшен размер шрифта коэффициентов
-         diag = FALSE             # убирает значения на диагонали
-         )
