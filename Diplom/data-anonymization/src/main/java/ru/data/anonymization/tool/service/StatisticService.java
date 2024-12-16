@@ -126,7 +126,7 @@ public class StatisticService {
                     .MD(null);
         }
         result = responseDto
-                .Shannon(BigDecimal.valueOf(Shannon / statisticMask.size()))
+                //.Shannon(BigDecimal.valueOf(Shannon / statisticMask.size()))
                 .risk(riskMethods)
                 .build();
 

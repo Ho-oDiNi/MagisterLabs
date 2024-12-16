@@ -34,7 +34,7 @@
             <TextField fx:id="port" minWidth="450"/>
         </HBox>
         <HBox style="-fx-alignment: center;-fx-padding: 10px 0px;">
-            <Label text="Базаданных:" style="-fx-padding: 0px 10px 0px 0px;"/>
+            <Label text="База данных:" style="-fx-padding: 0px 10px 0px 0px;"/>
             <TextField fx:id="database" minWidth="450"/>
         </HBox>
         <HBox style="-fx-alignment: center;-fx-padding: 10px 0px;">

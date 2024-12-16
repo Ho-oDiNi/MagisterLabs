@@ -36,7 +36,7 @@
                         <TextField fx:id="username" styleClass="auth-text-field" text="postgres"/>
                     </HBox>
                     <HBox styleClass="auth-field-box">
-                        <PasswordField fx:id="password" styleClass="auth-text-field" text="mask"/>
+                        <PasswordField fx:id="password" styleClass="auth-text-field" text="root"/>
                     </HBox>
                 </VBox>
             </HBox>

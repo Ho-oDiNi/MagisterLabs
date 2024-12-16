@@ -5,20 +5,52 @@ import ru.data.anonymization.tool.Methods.options.type.*;
 
 @Getter
 public enum MaskMethods {
-    DateAging("DateAging", ru.data.anonymization.tool.Methods.options.type.DateAging.class, "Старение даты"),
-    Decomposition("Decomposition", ru.data.anonymization.tool.Methods.options.type.Decomposition.class, "Декомпозиция"),
-    GeneralizationString("GeneralizationString", ru.data.anonymization.tool.Methods.options.type.GeneralizationString.class, "Обобщение строк"),
-    GeneralizationValue("GeneralizationValue", ru.data.anonymization.tool.Methods.options.type.GeneralizationValue.class, "Обобщение значений и дат"),
-    Identifier("Identifier", ru.data.anonymization.tool.Methods.options.type.Identifier.class, "Идентификатор"),
+    DateAging(
+            "DateAging",
+            ru.data.anonymization.tool.Methods.options.type.DateAging.class,
+            "Стирание даты"
+    ),
+    Decomposition(
+            "Decomposition",
+            ru.data.anonymization.tool.Methods.options.type.Decomposition.class,
+            "Метод Декомпозиции"
+    ),
+    GeneralizationString(
+            "GeneralizationString",
+            ru.data.anonymization.tool.Methods.options.type.GeneralizationString.class,
+            "Обобщение строк"
+    ),
+    GeneralizationValue(
+            "GeneralizationValue",
+            ru.data.anonymization.tool.Methods.options.type.GeneralizationValue.class,
+            "Обобщение значений и дат"
+    ),
+    Identifier(
+            "Identifier",
+            ru.data.anonymization.tool.Methods.options.type.Identifier.class,
+            "Введение Идентификаторов"
+    ),
     MicroAggregation("MicroAggregation", MicroAggregation.class, "Микроагрегирование"),
-    MicroAggregationBySingleAxis("MicroAggregationBySingleAxis", MicroAggregationBySingleAxis.class, "Микроагрегирование по оси"),
-    Round("Round", Round.class, "Округление"),
-    Shuffle("Shuffle", Shuffle.class, "Перемешивание"),
-    ValueReplacement("ValueReplacement", ValueReplacement.class, "Замена"),
-    ValueReplacementByPattern("ValueReplacementByPattern", ValueReplacementByPattern.class, "Замена по паттерну"),
-    ValueReplacementFromFile("ValueReplacementFromFile", ValueReplacementFromFile.class, "Замена из файла"),
-    ValueVariance("ValueVariance", ValueVariance.class, "Шум"),
-    RoundDate("RoundDate", RoundDate.class, "Округление даты");
+    MicroAggregationBySingleAxis(
+            "MicroAggregationBySingleAxis",
+            MicroAggregationBySingleAxis.class,
+            "Микроагрегирование по оси"
+    ),
+    Round("Round", Round.class, "Метод Округления"),
+    RoundDate("RoundDate", RoundDate.class, "Округление даты"),
+    Shuffle("Shuffle", Shuffle.class, "Метод Перемешивания"),
+    ValueReplacement("ValueReplacement", ValueReplacement.class, "Метод маскирования"),
+    ValueReplacementByPattern(
+            "ValueReplacementByPattern",
+            ValueReplacementByPattern.class,
+            "Метод маскирования по шаблону"
+    ),
+    ValueReplacementFromFile(
+            "ValueReplacementFromFile",
+            ValueReplacementFromFile.class,
+            "Метод маскирования из файла"
+    ),
+    ValueVariance("ValueVariance", ValueVariance.class, "Метод добавления Шума");
 
     final String name;
     final Class<?> methodClass;

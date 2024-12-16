@@ -19,10 +19,10 @@
             <Label text="Таблица:" style="-fx-padding: 0px 10px 0px 0px;"/>
             <TextField fx:id="tableName" minWidth="450" disable="true"/>
         </HBox>
-        <HBox style="-fx-alignment: center;-fx-padding: 10px 0px;">
-            <Label text="Новая таблица:" style="-fx-padding: 0px 10px 0px 0px;"/>
-            <TextField fx:id="newTableName" minWidth="450"/>
-        </HBox>
+<!--        <HBox style="-fx-alignment: center;-fx-padding: 10px 0px;">-->
+<!--            <Label text="Новая таблица:" style="-fx-padding: 0px 10px 0px 0px;"/>-->
+<!--            <TextField fx:id="newTableName" minWidth="450"/>-->
+<!--        </HBox>-->
         <HBox VBox.vgrow="ALWAYS" style="-fx-padding: 16px;" spacing="10">
             <ListView fx:id="leftListView" VBox.vgrow="ALWAYS" onMouseClicked="#moveToRightClick"/>
             <VBox alignment="CENTER">

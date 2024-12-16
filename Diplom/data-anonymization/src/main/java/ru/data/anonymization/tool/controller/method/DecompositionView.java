@@ -29,6 +29,7 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class DecompositionView {
+
     private static final int MAX_LENGTH = 40;
 
     private final TableInfoService tableInfoService;
@@ -60,9 +61,15 @@ public class DecompositionView {
 
     private Stage stage;
 
-    public void configView(String title, String table, ShowMode mode, String name, VBox vBox) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(DecompositionView.class.getResource("decomposition-view.fxml"));
-        stage = ComponentUtils.modalStageView(fxmlLoader, "Настройка метода (" + title + ")", "gears.png");
+    public void configView(String title, String table, ShowMode mode, String name, VBox vBox)
+            throws IOException {
+        FXMLLoader fxmlLoader = new FXMLLoader(DecompositionView.class.getResource(
+                "decomposition-view.fxml"));
+        stage = ComponentUtils.modalStageView(
+                fxmlLoader,
+                "Настройка метода (" + title + ")",
+                "gears.png"
+        );
         tableName.setText(table);
 
         List<String> columnList = tableInfoService.getColumnNames(table);
@@ -148,10 +155,10 @@ public class DecompositionView {
         } else if (newTableName.getText().isEmpty() || newTableName.getText().isBlank()) {
             DialogBuilder.createErrorDialog("Нужно ввести имя новой таблицы!");
         } else if (host.getText().isEmpty() || host.getText().isBlank() ||
-                port.getText().isEmpty() || port.getText().isBlank() ||
-                database.getText().isEmpty() || database.getText().isBlank() ||
-                username.getText().isEmpty() || username.getText().isBlank() ||
-                password.getText().isEmpty() || password.getText().isBlank()
+                   port.getText().isEmpty() || port.getText().isBlank() ||
+                   database.getText().isEmpty() || database.getText().isBlank() ||
+                   username.getText().isEmpty() || username.getText().isBlank() ||
+                   password.getText().isEmpty() || password.getText().isBlank()
         ) {
             DialogBuilder.createErrorDialog("Заполните все поля подключения к БД!");
         } else {
@@ -168,9 +175,10 @@ public class DecompositionView {
             dto.setNameNewTable(newTableName.getText());
             dto.setControllerOfDatabaseToTransfer(controllerDB);
 
-
-            if (mode.equals(ShowMode.EDIT) || !depersonalizationService.isContainsKey(customName.getText())) {
-                String name = customName.getText().length() < MAX_LENGTH ? customName.getText() : customName.getText().substring(0, MAX_LENGTH);
+            if (mode.equals(ShowMode.EDIT)
+                || !depersonalizationService.isContainsKey(customName.getText())) {
+                String name = customName.getText().length() < MAX_LENGTH ? customName.getText()
+                        : customName.getText().substring(0, MAX_LENGTH);
                 depersonalizationService.addMethod(name, dto);
                 stage.close();
             } else {
@@ -185,4 +193,5 @@ public class DecompositionView {
         vBox.getChildren().remove(node);
         stage.close();
     }
+
 }

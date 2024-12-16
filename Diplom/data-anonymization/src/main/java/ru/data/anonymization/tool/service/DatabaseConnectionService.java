@@ -65,6 +65,11 @@ public class DatabaseConnectionService {
     }
 
     public ResultSet executeQuery(String sql) throws SQLException {
-        return statement.executeQuery(sql);
+        try {
+            return statement.executeQuery(sql);
+        } catch (SQLException e) {
+            System.out.println(e.getLocalizedMessage());
+            throw e;
+        }
     }
 }

@@ -27,6 +27,7 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class IdentifierView {
+
     private static final int MAX_LENGTH = 40;
 
     private final TableInfoService tableInfoService;
@@ -34,23 +35,30 @@ public class IdentifierView {
 
     @FXML
     private ListView<String> leftListView;
+
     @FXML
     private ListView<String> rightListView;
-    @FXML
-    private TextField newTableName;
 
     @FXML
     private TextField customName;
+
     @FXML
     private TextField tableName;
+
     @FXML
     private HBox buttonContainer;
 
     private Stage stage;
 
-    public void configView(String title, String table, ShowMode mode, String name, VBox vBox) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(IdentifierView.class.getResource("identifier-view.fxml"));
-        stage = ComponentUtils.modalStageView(fxmlLoader, "Настройка метода (" + title + ")", "gears.png");
+    public void configView(String title, String table, ShowMode mode, String name, VBox vBox)
+            throws IOException {
+        FXMLLoader fxmlLoader = new FXMLLoader(IdentifierView.class.getResource(
+                "identifier-view.fxml"));
+        stage = ComponentUtils.modalStageView(
+                fxmlLoader,
+                "Настройка метода (" + title + ")",
+                "gears.png"
+        );
         tableName.setText(table);
 
         List<String> columnList = tableInfoService.getColumnNames(table);
@@ -68,8 +76,6 @@ public class IdentifierView {
 
             List<String> selectedElement = dto.getColumn();
             columnList.removeAll(selectedElement);
-
-            newTableName.setText(dto.getNewNameTable());
 
             ObservableList<String> leftItems = FXCollections.observableArrayList(columnList);
             leftListView.setItems(leftItems);
@@ -128,15 +134,14 @@ public class IdentifierView {
             DialogBuilder.createErrorDialog("Нужно ввести название!");
         } else if (columns.isEmpty()) {
             DialogBuilder.createErrorDialog("Нужно выбрать хотя бы один атрибут!");
-        } else if (newTableName.getText().isEmpty() || newTableName.getText().isBlank()) {
-            DialogBuilder.createErrorDialog("Нужно ввести имя новой таблицы!");
         } else {
             Identifier dto = new Identifier();
             dto.setNameTable(table);
             dto.setNamesColumn(columns);
-            dto.setNewNameTable(newTableName.getText());
-            if (mode.equals(ShowMode.EDIT) || !depersonalizationService.isContainsKey(customName.getText())) {
-                String name = customName.getText().length() < MAX_LENGTH ? customName.getText() : customName.getText().substring(0, MAX_LENGTH);
+            if (mode.equals(ShowMode.EDIT)
+                || !depersonalizationService.isContainsKey(customName.getText())) {
+                String name = customName.getText().length() < MAX_LENGTH ? customName.getText()
+                        : customName.getText().substring(0, MAX_LENGTH);
                 depersonalizationService.addMethod(name, dto);
                 stage.close();
             } else {
@@ -151,4 +156,5 @@ public class IdentifierView {
         vBox.getChildren().remove(node);
         stage.close();
     }
+
 }

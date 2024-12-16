@@ -80,7 +80,9 @@ public class DepersonalizationService {
     public String start() {
         methods = new ArrayList<>(methodsMap.values());
 
-        if (methods.isEmpty()) return null;
+        if (methods.isEmpty()) {
+            return null;
+        }
         String time = "0";
         try {
             init();
@@ -94,11 +96,23 @@ public class DepersonalizationService {
     private void init() throws Exception {
         oldConnection = controllerDB.getDatabase();
         String maskDB = "mask_" + controllerDB.getDatabase();
+        var someREs = controllerDB.executeQuery(
+                "SELECT pid, usename, datname, application_name, state \n"
+                + "FROM pg_stat_activity \n"
+                + "WHERE datname = 'mad';");
+        while (someREs.next()) {
+            System.out.println("PID: " + someREs.getInt("pid"));
+            System.out.println("User: " + someREs.getString("usename"));
+            System.out.println("Database: " + someREs.getString("datname"));
+            System.out.println("Application: " + someREs.getString("application_name"));
+            System.out.println("State: " + someREs.getString("state"));
+            System.out.println("----------------------------");
+        }
         controllerDB.execute("DROP DATABASE IF EXISTS " + maskDB + ";");
         controllerDB.execute(
                 "CREATE DATABASE " + maskDB
-                        + " WITH TEMPLATE " + controllerDB.getDatabase()
-                        + " OWNER " + controllerDB.getUsername() + ";");
+                + " WITH TEMPLATE " + controllerDB.getDatabase()
+                + " OWNER " + controllerDB.getUsername() + ";");
         controllerDB.setNameDB(maskDB);
 
         controllerDB.disconnect();
@@ -106,7 +120,9 @@ public class DepersonalizationService {
     }
 
     public void backToOriginDatabase() {
-        if (oldConnection == null) return;
+        if (oldConnection == null) {
+            return;
+        }
         controllerDB.setNameDB(oldConnection);
         controllerDB.disconnect();
         controllerDB.connect();
@@ -132,4 +148,5 @@ public class DepersonalizationService {
         NumberFormat formatter = new DecimalFormat("#0.00");
         return formatter.format((end - start) / 1000d).replace(",", ".");
     }
+
 }
