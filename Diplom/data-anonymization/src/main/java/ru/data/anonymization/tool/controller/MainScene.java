@@ -16,7 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.data.anonymization.tool.config.AppContext;
 import ru.data.anonymization.tool.dto.DataPreparationDto;
-import ru.data.anonymization.tool.dto.Enum.MaskMethods;
+import ru.data.anonymization.tool.dto.enums.MaskMethods;
 import ru.data.anonymization.tool.dto.RiskDto;
 import ru.data.anonymization.tool.dto.StatisticResponseDto;
 import ru.data.anonymization.tool.service.*;

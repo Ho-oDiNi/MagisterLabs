@@ -1,4 +1,4 @@
-package ru.data.anonymization.tool.dto.Enum;
+package ru.data.anonymization.tool.dto.enums;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

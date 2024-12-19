@@ -4,9 +4,9 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.data.anonymization.tool.Methods.options.type.*;
+import ru.data.anonymization.tool.methods.options.type.*;
 import ru.data.anonymization.tool.dto.DataPreparationDto;
-import ru.data.anonymization.tool.dto.Enum.RiskEnum;
+import ru.data.anonymization.tool.dto.enums.RiskEnum;
 import ru.data.anonymization.tool.dto.RiskDto;
 import ru.data.anonymization.tool.dto.StatisticDto;
 import ru.data.anonymization.tool.dto.StatisticResponseDto;
@@ -20,7 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import static ru.data.anonymization.tool.Methods.risk.RiskAssessment.*;
+import static ru.data.anonymization.tool.methods.risk.RiskAssessment.*;
 
 
 @Data

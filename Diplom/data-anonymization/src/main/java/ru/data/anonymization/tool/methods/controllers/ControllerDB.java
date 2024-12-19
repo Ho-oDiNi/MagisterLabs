@@ -1,7 +1,6 @@
-package ru.data.anonymization.tool.Methods.controllers;
+package ru.data.anonymization.tool.methods.controllers;
 
 import lombok.Data;
-import lombok.Getter;
 
 import java.io.Serializable;
 import java.sql.*;

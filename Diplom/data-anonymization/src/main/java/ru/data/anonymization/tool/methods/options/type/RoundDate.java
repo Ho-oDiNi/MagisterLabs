@@ -1,8 +1,8 @@
-package ru.data.anonymization.tool.Methods.options.type;
+package ru.data.anonymization.tool.methods.options.type;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.data.anonymization.tool.Methods.options.MaskItem;
+import ru.data.anonymization.tool.methods.options.MaskItem;
 import ru.data.anonymization.tool.service.DatabaseConnectionService;
 
 import java.util.List;

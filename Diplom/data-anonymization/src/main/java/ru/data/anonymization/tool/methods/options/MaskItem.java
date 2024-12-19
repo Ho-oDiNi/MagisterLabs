@@ -1,4 +1,4 @@
-package ru.data.anonymization.tool.Methods.options;
+package ru.data.anonymization.tool.methods.options;
 
 import ru.data.anonymization.tool.service.DatabaseConnectionService;
 

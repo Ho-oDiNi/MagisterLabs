@@ -12,9 +12,9 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import ru.data.anonymization.tool.Methods.options.type.ValueReplacementFromFile;
+import ru.data.anonymization.tool.methods.options.type.ValueReplacementFromFile;
 import ru.data.anonymization.tool.builder.DialogBuilder;
-import ru.data.anonymization.tool.dto.Enum.ShowMode;
+import ru.data.anonymization.tool.dto.enums.ShowMode;
 import ru.data.anonymization.tool.service.DepersonalizationService;
 import ru.data.anonymization.tool.util.ComponentUtils;
 

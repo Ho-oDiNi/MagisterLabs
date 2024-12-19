@@ -1,33 +1,33 @@
-package ru.data.anonymization.tool.dto.Enum;
+package ru.data.anonymization.tool.dto.enums;
 
 import lombok.Getter;
-import ru.data.anonymization.tool.Methods.options.type.*;
+import ru.data.anonymization.tool.methods.options.type.*;
 
 @Getter
 public enum MaskMethods {
     DateAging(
             "DateAging",
-            ru.data.anonymization.tool.Methods.options.type.DateAging.class,
+            ru.data.anonymization.tool.methods.options.type.DateAging.class,
             "Стирание даты"
     ),
     Decomposition(
             "Decomposition",
-            ru.data.anonymization.tool.Methods.options.type.Decomposition.class,
+            ru.data.anonymization.tool.methods.options.type.Decomposition.class,
             "Метод Декомпозиции"
     ),
     GeneralizationString(
             "GeneralizationString",
-            ru.data.anonymization.tool.Methods.options.type.GeneralizationString.class,
+            ru.data.anonymization.tool.methods.options.type.GeneralizationString.class,
             "Обобщение строк"
     ),
     GeneralizationValue(
             "GeneralizationValue",
-            ru.data.anonymization.tool.Methods.options.type.GeneralizationValue.class,
+            ru.data.anonymization.tool.methods.options.type.GeneralizationValue.class,
             "Обобщение значений и дат"
     ),
     Identifier(
             "Identifier",
-            ru.data.anonymization.tool.Methods.options.type.Identifier.class,
+            ru.data.anonymization.tool.methods.options.type.Identifier.class,
             "Введение Идентификаторов"
     ),
     MicroAggregation("MicroAggregation", MicroAggregation.class, "Микроагрегирование"),

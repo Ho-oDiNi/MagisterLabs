@@ -1,4 +1,4 @@
-package ru.data.anonymization.tool.Methods.risk;
+package ru.data.anonymization.tool.methods.risk;
 
 import ru.data.anonymization.tool.util.Factorial;
 

@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.springframework.stereotype.Service;
 import ru.data.anonymization.tool.dto.DataPreparationDto;
-import ru.data.anonymization.tool.dto.Enum.PreparationEnum;
+import ru.data.anonymization.tool.dto.enums.PreparationEnum;
 
 import java.sql.ResultSet;
 import java.util.ArrayList;

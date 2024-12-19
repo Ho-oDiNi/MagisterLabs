@@ -6,12 +6,12 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.data.anonymization.tool.Methods.options.MaskItem;
+import ru.data.anonymization.tool.methods.options.MaskItem;
 import ru.data.anonymization.tool.builder.DialogBuilder;
 import ru.data.anonymization.tool.config.AppContext;
 import ru.data.anonymization.tool.controller.method.*;
-import ru.data.anonymization.tool.dto.Enum.MaskMethods;
-import ru.data.anonymization.tool.dto.Enum.ShowMode;
+import ru.data.anonymization.tool.dto.enums.MaskMethods;
+import ru.data.anonymization.tool.dto.enums.ShowMode;
 import ru.data.anonymization.tool.util.ComponentUtils;
 
 @Service

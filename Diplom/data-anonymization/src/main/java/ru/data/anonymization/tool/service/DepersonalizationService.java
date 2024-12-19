@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.springframework.stereotype.Service;
-import ru.data.anonymization.tool.Methods.options.MaskItem;
+import ru.data.anonymization.tool.methods.options.MaskItem;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;

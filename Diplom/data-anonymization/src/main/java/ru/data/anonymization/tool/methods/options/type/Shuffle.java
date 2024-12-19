@@ -1,9 +1,10 @@
-package ru.data.anonymization.tool.Methods.options.type;
+package ru.data.anonymization.tool.methods.options.type;
 
 import java.sql.SQLException;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.data.anonymization.tool.Methods.options.MaskItem;
+import lombok.extern.slf4j.Slf4j;
+import ru.data.anonymization.tool.methods.options.MaskItem;
 import ru.data.anonymization.tool.service.DatabaseConnectionService;
 
 import java.sql.ResultSet;
@@ -13,6 +14,7 @@ import java.util.Random;
 
 @Data
 @NoArgsConstructor
+@Slf4j
 public class Shuffle implements MaskItem {
 
     private String nameTable;
@@ -54,6 +56,12 @@ public class Shuffle implements MaskItem {
             resultSet = controllerDB.executeQuery(
                     "select " + columnsRow + ",masking_id_for_shuffle from " + nameTable + ";");
 
+            while (resultSet.next()) {
+                for (int k = 1; k <= 2; k++) {
+                    log.debug(resultSet.getString(k));
+                }
+            }
+            resultSet.beforeFirst();
             shuffling(sizeTable, resultSet, oldPosition, newPosition);
             controllerDB.execute(
                     "ALTER TABLE " + nameTable + " DROP COLUMN masking_id_for_shuffle;");
@@ -73,17 +81,18 @@ public class Shuffle implements MaskItem {
             List<Integer> oldPosition,
             List<Integer> newPosition) throws SQLException {
         int cur;
-        int lastEl = sizeTable;
-        Object buf1, buf2;
+        Object buf1;
+        Object buf2;
         Random random = new Random();
-        for (int i = 1; i < sizeTable; i++) {
-            cur = random.nextInt(lastEl - 1) + 1;
-            System.out.println(cur);
-            for (int j = 1; j < namesColumn.size() + 1; j++) {
+        for (int i = sizeTable; i >= 2; i--) {
+            cur = random.nextInt(i - 1) + 1;
+            log.debug(String.valueOf(cur));
+
+            for (int j = 1; j < 2; j++) {
                 resultSet.absolute(cur);
                 buf1 = resultSet.getObject(j);
 
-                resultSet.absolute(lastEl);
+                resultSet.absolute(i);
                 buf2 = resultSet.getObject(j);
 
                 resultSet.updateObject(j, buf1);
@@ -94,10 +103,18 @@ public class Shuffle implements MaskItem {
                 resultSet.updateRow();
 
                 oldPosition.add(cur);
-                newPosition.add(lastEl);
+                newPosition.add(i);
             }
-
-            lastEl--;
+            resultSet.beforeFirst();
+            log.debug("{old id : {}, new id : {}}", cur, i);
+            int count = 1;
+            while (resultSet.next()) {
+                for (int k = 1; k < 2; k++) {
+                    log.debug("{} , {}", resultSet.getString(k), count);
+                }
+                count++;
+            }
+            resultSet.beforeFirst();
         }
     }
 

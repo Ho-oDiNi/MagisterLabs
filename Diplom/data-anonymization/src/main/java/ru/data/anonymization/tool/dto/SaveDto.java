@@ -1,7 +1,7 @@
 package ru.data.anonymization.tool.dto;
 
 import lombok.Data;
-import ru.data.anonymization.tool.Methods.options.MaskItem;
+import ru.data.anonymization.tool.methods.options.MaskItem;
 
 import java.io.Serializable;
 import java.util.HashMap;
