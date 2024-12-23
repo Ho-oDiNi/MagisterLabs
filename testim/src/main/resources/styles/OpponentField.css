@@ -1,0 +1,23 @@
+
+.button:hover{
+    -fx-background-color: hotpink;
+}
+
+.button:pressed{
+  -fx-background-color: deeppink;
+}
+
+
+.button:disabled{
+    -fx-opacity: 1.0;
+}
+
+.button{
+    -fx-background-color: skyblue;
+    -fx-background-radius: 0;
+    -fx-border-color: white;
+    -fx-border-width: 0.2px;
+}
+
+
+
