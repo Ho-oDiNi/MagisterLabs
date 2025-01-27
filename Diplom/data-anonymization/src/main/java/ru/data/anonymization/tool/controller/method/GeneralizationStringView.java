@@ -69,7 +69,7 @@ public class GeneralizationStringView {
             GeneralizationString dto = (GeneralizationString) depersonalizationService.getMethod(name);
             tableName.setText(dto.getTable());
             newTableName.setText(dto.getGeneralizationTable());
-            value = new HashMap<>(dto.getValue());
+            value = new HashMap<>(dto.getValues());
 
             Button deleteButton = new Button("Удалить");
             deleteButton.setStyle("-fx-background-color: #e83434; -fx-text-fill: white;");
@@ -94,7 +94,7 @@ public class GeneralizationStringView {
             dto.setNameTable(table);
             dto.setNameColumn(column);
             dto.setGeneralizationTable(newTableName.getText());
-            dto.setValue(value);
+            dto.setValues(value);
             if (mode.equals(ShowMode.EDIT) || !depersonalizationService.isContainsKey(customName.getText())) {
                 String name = customName.getText().length() < MAX_LENGTH ? customName.getText() : customName.getText().substring(0, MAX_LENGTH);
                 depersonalizationService.addMethod(name, dto);

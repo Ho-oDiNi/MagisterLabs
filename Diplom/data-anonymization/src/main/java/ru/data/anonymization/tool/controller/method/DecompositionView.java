@@ -89,11 +89,6 @@ public class DecompositionView {
             columnList.removeAll(selectedElement);
 
             newTableName.setText(dto.getNameNewTable());
-            host.setText(dto.getControllerOfDatabaseToTransfer().getHost());
-            port.setText(dto.getControllerOfDatabaseToTransfer().getPort());
-            database.setText(dto.getControllerOfDatabaseToTransfer().getDatabase());
-            username.setText(dto.getControllerOfDatabaseToTransfer().getUsername());
-            password.setText(dto.getControllerOfDatabaseToTransfer().getPassword());
 
             ObservableList<String> leftItems = FXCollections.observableArrayList(columnList);
             leftListView.setItems(leftItems);
@@ -154,26 +149,18 @@ public class DecompositionView {
             DialogBuilder.createErrorDialog("Нужно выбрать хотя бы один атрибут!");
         } else if (newTableName.getText().isEmpty() || newTableName.getText().isBlank()) {
             DialogBuilder.createErrorDialog("Нужно ввести имя новой таблицы!");
-        } else if (host.getText().isEmpty() || host.getText().isBlank() ||
-                   port.getText().isEmpty() || port.getText().isBlank() ||
-                   database.getText().isEmpty() || database.getText().isBlank() ||
-                   username.getText().isEmpty() || username.getText().isBlank() ||
-                   password.getText().isEmpty() || password.getText().isBlank()
-        ) {
-            DialogBuilder.createErrorDialog("Заполните все поля подключения к БД!");
         } else {
-            ControllerDB controllerDB = new ControllerDB();
-            controllerDB.setPort(port.getText());
-            controllerDB.setHost(host.getText());
-            controllerDB.setDatabase(database.getText());
-            controllerDB.setUsername(username.getText());
-            controllerDB.setPassword(password.getText());
+//            ControllerDB controllerDB = new ControllerDB();
+//            controllerDB.setPort(port.getText());
+//            controllerDB.setHost(host.getText());
+//            controllerDB.setDatabase(database.getText());
+//            controllerDB.setUsername(username.getText());
+//            controllerDB.setPassword(password.getText());
 
             Decomposition dto = new Decomposition();
             dto.setNameTable(table);
             dto.setNameColumns(columns);
             dto.setNameNewTable(newTableName.getText());
-            dto.setControllerOfDatabaseToTransfer(controllerDB);
 
             if (mode.equals(ShowMode.EDIT)
                 || !depersonalizationService.isContainsKey(customName.getText())) {

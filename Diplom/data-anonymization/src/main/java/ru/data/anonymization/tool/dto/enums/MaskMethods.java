@@ -43,7 +43,7 @@ public enum MaskMethods {
     ValueReplacementByPattern(
             "ValueReplacementByPattern",
             ValueReplacementByPattern.class,
-            "Метод маскирования по шаблону"
+            "Метод маскирования"
     ),
     ValueReplacementFromFile(
             "ValueReplacementFromFile",

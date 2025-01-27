@@ -11,11 +11,13 @@ import java.util.List;
 
 @Data
 @NoArgsConstructor
+//Сделать для нескольких
 public class GeneralizationString implements MaskItem {
+
     private String nameTable;
     private String nameColumn;
     private String generalizationTable;
-    private HashMap<String, String> value;
+    private HashMap<String, String> values;
 
     @Override
     public String getTable() {
@@ -29,15 +31,21 @@ public class GeneralizationString implements MaskItem {
 
     @Override
     public void start(DatabaseConnectionService controllerDB) throws Exception {
-        controllerDB.execute("DROP TABLE IF EXISTS "+generalizationTable+";");
-        controllerDB.execute("CREATE TABLE "+generalizationTable+"(generalization text,value text);");
-        value.forEach((key, value) -> {
+        controllerDB.execute("DROP TABLE IF EXISTS " + generalizationTable + ";");
+        controllerDB.execute(
+                "CREATE TABLE " + generalizationTable + "(generalization text,value text);");
+        values.forEach((key, value) -> {
             try {
-                controllerDB.execute("UPDATE "+nameTable+" SET "+nameColumn+"='"+value+"' WHERE "+nameColumn+"='"+key+"';");
-                controllerDB.execute("INSERT INTO "+generalizationTable+" VALUES ('"+value+"', '"+key+"');");
+                controllerDB.execute(
+                        "UPDATE " + nameTable + " SET " + nameColumn + "='" + value + "' WHERE "
+                        + nameColumn + "='" + key + "';");
+                controllerDB.execute(
+                        "INSERT INTO " + generalizationTable + " VALUES ('" + value + "', '" + key
+                        + "');");
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
         });
     }
+
 }

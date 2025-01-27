@@ -105,8 +105,18 @@ public class MicroAggregationView {
     private void moveToRight() {
         String selectedItem = leftListView.getSelectionModel().getSelectedItem();
         if (selectedItem != null) {
-            leftListView.getItems().remove(selectedItem);
-            rightListView.getItems().add(selectedItem);
+            var attributeType = tableInfoService.getAttributeType(
+                    tableName.getText(),
+                    selectedItem
+            );
+            System.out.println(attributeType);
+            if ((attributeType.equals("integer") || attributeType.equals("real"))) {
+                leftListView.getItems().remove(selectedItem);
+                rightListView.getItems().add(selectedItem);
+            } else {
+                DialogBuilder.createErrorDialog("Тип данных должен быть количественного типа!!");
+            }
+
         }
     }
 

@@ -26,7 +26,8 @@ public class TableInfoService {
     public List<String> getTables() {
         List<String> list = new ArrayList<>();
         try {
-            ResultSet resultSet = connection.executeQuery("SELECT tablename FROM pg_catalog.pg_tables where schemaname = 'public';");
+            ResultSet resultSet = connection.executeQuery(
+                    "SELECT tablename FROM pg_catalog.pg_tables where schemaname = 'public';");
             while (resultSet.next()) {
                 list.add(resultSet.getString(1));
             }
@@ -43,7 +44,10 @@ public class TableInfoService {
         tableview.prefHeight(1000);
         String firstColumn = getColumnNames(nameTable).get(0);
         try {
-            String SQL = "SELECT * from " + nameTable + " ORDER BY " + firstColumn + " OFFSET " + (page * 500) + " LIMIT 500";
+            String SQL =
+                    "SELECT * from " + nameTable + " ORDER BY " + firstColumn + " OFFSET " + (page
+                                                                                              * 500)
+                    + " LIMIT 500";
             ResultSet rs = connection.executeQuery(SQL);
             for (int i = 0; i < rs.getMetaData().getColumnCount(); i++) {
                 final int j = i;
@@ -51,7 +55,9 @@ public class TableInfoService {
                 col.setReorderable(false);
                 col.setCellValueFactory((Callback<TableColumn.CellDataFeatures<ObservableList, String>, ObservableValue<String>>) param -> {
                     Object elem = param.getValue().get(j);
-                    if (elem != null) return new SimpleStringProperty(param.getValue().get(j).toString());
+                    if (elem != null) {
+                        return new SimpleStringProperty(param.getValue().get(j).toString());
+                    }
                     return null;
                 });
 
@@ -92,7 +98,8 @@ public class TableInfoService {
         List<String> columns = new ArrayList<>();
 
         try {
-            resultSet = connection.executeQuery("SELECT * FROM " + tableName + " LIMIT 0;"); // Тут прописать столбцы
+            resultSet = connection.executeQuery(
+                    "SELECT * FROM " + tableName + " LIMIT 0;"); // Тут прописать столбцы
             ResultSetMetaData metaData = resultSet.getMetaData();
             int columnCount = metaData.getColumnCount();
             for (int i = 1; i <= columnCount; i++) {
@@ -109,7 +116,8 @@ public class TableInfoService {
         List<String> tables = new ArrayList<>();
 
         try {
-            resultSet = connection.executeQuery("SELECT table_name FROM information_schema.tables WHERE table_schema='public' AND table_type='BASE TABLE';");
+            resultSet = connection.executeQuery(
+                    "SELECT table_name FROM information_schema.tables WHERE table_schema='public' AND table_type='BASE TABLE';");
             while (resultSet.next()) {
                 tables.add(resultSet.getString(1));
             }
@@ -118,7 +126,6 @@ public class TableInfoService {
         }
         return tables;
     }
-
 
     public List<String[]> getTableLikeList(String table, List<String> column) {
         List<String[]> source = new ArrayList<>();
@@ -140,8 +147,11 @@ public class TableInfoService {
                     attributeTypeDto.setColumn(col);
 
                     Object value = resultSet.getObject(col);
-                    if (value != null) row.add(value.toString());
-                    else row.add("NULL");
+                    if (value != null) {
+                        row.add(value.toString());
+                    } else {
+                        row.add("NULL");
+                    }
                 }
                 source.add(row.toArray(new String[0]));
             }
@@ -149,6 +159,26 @@ public class TableInfoService {
             throw new RuntimeException(e);
         }
         return source;
+    }
+
+    public String getAttributeType(String tableName, String columnName) {
+        var queryToGetDataType = """
+                SELECT  data_type
+                FROM information_schema.columns
+                WHERE table_name = ? AND column_name = ?;
+                """;
+        try {
+            var prepareStatement = connection.getPrepareStatement(queryToGetDataType);
+            prepareStatement.setString(1, tableName);
+            prepareStatement.setString(2, columnName);
+            var res = prepareStatement.executeQuery();
+             res.next();
+             return res.getString(1);
+        } catch (SQLException e) {
+            System.out.println(e.getLocalizedMessage());
+            return "Error";
+        }
+
     }
 
 }

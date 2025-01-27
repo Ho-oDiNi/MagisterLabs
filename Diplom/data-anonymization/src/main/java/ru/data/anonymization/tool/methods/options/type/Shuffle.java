@@ -106,11 +106,11 @@ public class Shuffle implements MaskItem {
                 newPosition.add(i);
             }
             resultSet.beforeFirst();
-            log.debug("{old id : {}, new id : {}}", cur, i);
+            log.info("{old id : {}, new id : {}}", cur, i);
             int count = 1;
             while (resultSet.next()) {
                 for (int k = 1; k < 2; k++) {
-                    log.debug("{} , {}", resultSet.getString(k), count);
+                    log.info("{} , {}", resultSet.getString(k), count);
                 }
                 count++;
             }

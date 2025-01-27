@@ -1,5 +1,7 @@
 package ru.data.anonymization.tool.methods.options.type;
 
+import java.sql.ResultSet;
+import java.util.Date;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.data.anonymization.tool.methods.options.MaskItem;
@@ -10,6 +12,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 public class RoundDate implements MaskItem {
+
     private String nameTable;
     private String nameColumn;
     private String type;
@@ -37,9 +40,15 @@ public class RoundDate implements MaskItem {
         };
 
         if (typeFor != null) {
-            controllerDB.execute("update " + nameTable + " set " + nameColumn + " = date_trunc('" + typeFor + "', " + nameColumn + ") where " + nameColumn + " is not null;");
+
+            var sqlExpression =
+                    "update " + nameTable + " set " + nameColumn + " =  date_trunc( '" + typeFor
+                    + "'," + nameColumn + ")::date where " + nameColumn + " is not null;";
+            controllerDB.execute(sqlExpression);
         } else {
             throw new Exception("Тип незадан!");
         }
     }
+
+
 }

@@ -72,4 +72,13 @@ public class DatabaseConnectionService {
             throw e;
         }
     }
+
+    public PreparedStatement getPrepareStatement(String sql) throws SQLException {
+        try {
+            return connection.prepareStatement(sql);
+        } catch (SQLException e) {
+            System.out.println(e.getLocalizedMessage());
+            throw e;
+        }
+    }
 }

@@ -25,27 +25,6 @@
         </HBox>
 
 
-        <HBox style="-fx-alignment: center;-fx-padding: 10px 0px;">
-            <Label text="Хост:" style="-fx-padding: 0px 10px 0px 0px;"/>
-            <TextField fx:id="host" minWidth="450"/>
-        </HBox>
-        <HBox style="-fx-alignment: center;-fx-padding: 10px 0px;">
-            <Label text="Порт:" style="-fx-padding: 0px 10px 0px 0px;"/>
-            <TextField fx:id="port" minWidth="450"/>
-        </HBox>
-        <HBox style="-fx-alignment: center;-fx-padding: 10px 0px;">
-            <Label text="База данных:" style="-fx-padding: 0px 10px 0px 0px;"/>
-            <TextField fx:id="database" minWidth="450"/>
-        </HBox>
-        <HBox style="-fx-alignment: center;-fx-padding: 10px 0px;">
-            <Label text="Пользователь:" style="-fx-padding: 0px 10px 0px 0px;"/>
-            <TextField fx:id="username" minWidth="450"/>
-        </HBox>
-        <HBox style="-fx-alignment: center;-fx-padding: 10px 0px;">
-            <Label text="Пароль:" style="-fx-padding: 0px 10px 0px 0px;"/>
-            <PasswordField fx:id="password" minWidth="450"/>
-        </HBox>
-
         <HBox VBox.vgrow="ALWAYS" style="-fx-padding: 16px;" spacing="10" minHeight="200">
             <ListView fx:id="leftListView" VBox.vgrow="ALWAYS" onMouseClicked="#moveToRightClick"/>
             <VBox alignment="CENTER">

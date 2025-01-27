@@ -220,10 +220,10 @@ public class MainScene {
         universalMaskMethods.add(MaskMethods.Identifier);
         universalMaskMethods.add(MaskMethods.Decomposition);
         universalMaskMethods.add(MaskMethods.Shuffle);
-        universalMaskMethods.add(MaskMethods.ValueReplacement);
-        universalMaskMethods.add(MaskMethods.ValueReplacementFromFile);
+//        universalMaskMethods.add(MaskMethods.ValueReplacement);
+//        universalMaskMethods.add(MaskMethods.ValueReplacementFromFile);
         universalMaskMethods.add(MaskMethods.MicroAggregation);
-        universalMaskMethods.add(MaskMethods.MicroAggregationBySingleAxis);
+//        universalMaskMethods.add(MaskMethods.MicroAggregationBySingleAxis);
 
         stringMaskMethods.add(MaskMethods.GeneralizationString);
         stringMaskMethods.add(MaskMethods.ValueReplacementByPattern);
