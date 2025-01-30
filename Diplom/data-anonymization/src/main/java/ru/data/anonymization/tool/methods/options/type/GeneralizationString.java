@@ -38,7 +38,7 @@ public class GeneralizationString implements MaskItem {
             try {
                 controllerDB.execute(
                         "UPDATE " + nameTable + " SET " + nameColumn + "='" + value + "' WHERE "
-                        + nameColumn + "='" + key + "';");
+                        + nameColumn + "~'" + key + "';");
                 controllerDB.execute(
                         "INSERT INTO " + generalizationTable + " VALUES ('" + value + "', '" + key
                         + "');");
