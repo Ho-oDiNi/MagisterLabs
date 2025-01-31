@@ -41,9 +41,11 @@ public class GeneralizationValue implements MaskItem {
         String isChangeNameColumn = "is_change_temp_column";
         String newColumn = "is_new_temp_column";
         int countGroup = 0;
-
         controllerDB.execute("ALTER TABLE " + nameTable + " ADD COLUMN " + isChangeNameColumn
-                             + " TEXT DEFAULT 0");
+                             + " TEXT");
+        controllerDB.execute(
+                "UPDATE " + nameTable + " SET " + isChangeNameColumn + " = " + nameColumn
+                + "::TEXT");
         if (instruct.equals("default")) {
             controllerDB.execute("DROP TABLE IF EXISTS " + generalizationTable + ";");
             controllerDB.execute("CREATE TABLE IF NOT EXISTS " + generalizationTable
@@ -54,7 +56,10 @@ public class GeneralizationValue implements MaskItem {
                         "ALTER TABLE " + nameTable + " ADD COLUMN " + newColumn + " DATE;");
             } else {
                 controllerDB.execute("ALTER TABLE " + nameTable + " ADD COLUMN " + newColumn
-                                     + " FLOAT DEFAULT 0;");
+                                     + " FLOAT;");
+                controllerDB.execute(
+                        "UPDATE " + nameTable + " SET " + newColumn + " = " + nameColumn
+                        + ";");
             }
         }
 
@@ -69,21 +74,20 @@ public class GeneralizationValue implements MaskItem {
                 System.out.println("UPDATE " + nameTable +
                                    " SET " + isChangeNameColumn + "=" + (i + 1) +
                                    " WHERE " + nameColumn + ">'" + minValue.get(i) +
-                                   "' AND " + nameColumn + "<='" + maxValue.get(i) +
-                                   "' AND " + isChangeNameColumn + " LIKE '0';");
+                                   "' AND " + nameColumn + "<='" + maxValue.get(i) + "'"
+                );
                 controllerDB.execute(
                         "UPDATE " + nameTable +
                         " SET " + isChangeNameColumn + "=" + (i + 1) +
                         " WHERE " + nameColumn + ">'" + minValue.get(i) +
-                        "' AND " + nameColumn + "<='" + maxValue.get(i) +
-                        "' AND " + isChangeNameColumn + " LIKE '0';"
+                        "' AND " + nameColumn + "<='" + maxValue.get(i) + "'"
                 );
+
             } else {
                 var changeSql = "UPDATE " + nameTable +
                                 " SET " + isChangeNameColumn + "=" + (i + 1) +
-                                " WHERE " + nameColumn + ">" + minValue.get(i) +
-                                " AND " + nameColumn + "<=" + maxValue.get(i) +
-                                " AND " + isChangeNameColumn + " LIKE '0';";
+                                " WHERE " + nameColumn + ">'" + minValue.get(i) + "'" +
+                                " AND " + nameColumn + "<='" + maxValue.get(i) + "'";
                 controllerDB.execute(changeSql);
             }
         }
@@ -93,18 +97,18 @@ public class GeneralizationValue implements MaskItem {
                 for (int i = 1; i <= countGroup; i++) {
                     ResultSet resultSet = controllerDB.executeQuery(
                             "select avg(" + nameColumn + ")" + " FROM " + nameTable + " WHERE "
-                            + nameColumn + " is not null and " + isChangeNameColumn + "=" + i
-                            + ";");
+                            + nameColumn + " is not null and " + isChangeNameColumn + " LIKE '" + i
+                            + "';");
                     resultSet.next();
                     Object value = resultSet.getObject(1);
                     if (isDate) {
                         controllerDB.execute(
                                 "UPDATE " + nameTable + " SET " + newColumn + "='" + value
-                                + "' WHERE " + isChangeNameColumn + "=" + i + ";");
+                                + "' WHERE " + isChangeNameColumn + " LIKE '" + i + "';");
                     } else {
                         controllerDB.execute(
                                 "UPDATE " + nameTable + " SET " + newColumn + "=" + value
-                                + " WHERE " + isChangeNameColumn + "=" + i + ";");
+                                + " WHERE " + isChangeNameColumn + " LIKE '" + i + "';");
                     }
                 }
             }
@@ -112,7 +116,7 @@ public class GeneralizationValue implements MaskItem {
                 for (int i = 1; i <= generalizationName.size(); i++) {
                     ResultSet resultSet = controllerDB.executeQuery(
                             "select  count(*) from " + nameTable + " WHERE " + nameColumn
-                            + " IS NOT NULL and " + isChangeNameColumn + "=" + i + ";");
+                            + " IS NOT NULL and " + isChangeNameColumn + " LIKE '" + i + "';");
                     resultSet.next();
                     long size = resultSet.getLong(1);
                     long meddle = (size / 2) - 1;
@@ -121,15 +125,15 @@ public class GeneralizationValue implements MaskItem {
                     if ((size % 2) == 1) {
                         resultSet = controllerDB.executeQuery(
                                 "SELECT " + nameColumn + " FROM " + nameTable + " WHERE "
-                                + nameColumn + " IS NOT NULL and " + isChangeNameColumn + "=" + i
-                                + " ORDER BY " + nameColumn + " OFFSET " + meddle + " LIMIT 1;");
+                                + nameColumn + " IS NOT NULL and " + isChangeNameColumn + " LIKE '" + i
+                                + "' ORDER BY " + nameColumn + " OFFSET " + meddle + " LIMIT 1;");
                         resultSet.next();
                         value = resultSet.getLong(1);
                     } else {
                         resultSet = controllerDB.executeQuery(
                                 "SELECT " + nameColumn + " FROM " + nameTable + " WHERE "
-                                + nameColumn + " IS NOT NULL and " + isChangeNameColumn + "=" + i
-                                + " ORDER BY " + nameColumn + " OFFSET " + meddle + " LIMIT 2;");
+                                + nameColumn + " IS NOT NULL and " + isChangeNameColumn + " LIKE '" + i
+                                + "' ORDER BY " + nameColumn + " OFFSET " + meddle + " LIMIT 2;");
                         resultSet.next();
                         value = resultSet.getLong(1);
                         resultSet.next();
@@ -139,11 +143,11 @@ public class GeneralizationValue implements MaskItem {
                     if (isDate) {
                         controllerDB.execute(
                                 "UPDATE " + nameTable + " SET " + newColumn + "='" + value
-                                + "' WHERE " + isChangeNameColumn + "=" + i + ";");
+                                + "' WHERE " + isChangeNameColumn + " LIKE '" + i + "';");
                     } else {
                         controllerDB.execute(
                                 "UPDATE " + nameTable + " SET " + newColumn + "=" + value
-                                + " WHERE " + isChangeNameColumn + "=" + i + ";");
+                                + " WHERE " + isChangeNameColumn + " LIKE '" + i + "';");
                     }
                 }
             }
@@ -151,42 +155,23 @@ public class GeneralizationValue implements MaskItem {
                 for (int i = 1; i <= generalizationName.size(); i++) {
                     ResultSet resultSet = controllerDB.executeQuery(
                             "select  mode() within group (order by " + nameColumn + ") from "
-                            + nameTable + " WHERE " + isChangeNameColumn + "=" + i + ";");
+                            + nameTable + " WHERE " + isChangeNameColumn + " LIKE '" + i + "';");
                     resultSet.next();
                     Object value = resultSet.getObject(1);
 
                     if (isDate) {
                         controllerDB.execute(
                                 "UPDATE " + nameTable + " SET " + newColumn + "='" + value
-                                + "' WHERE " + isChangeNameColumn + "=" + i + ";");
+                                + "' WHERE " + isChangeNameColumn + " LIKE '" + i + "';");
                     } else {
                         controllerDB.execute(
                                 "UPDATE " + nameTable + " SET " + newColumn + "=" + value
-                                + " WHERE " + isChangeNameColumn + "=" + i + ";");
+                                + " WHERE " + isChangeNameColumn + " LIKE '" + i + "';");
                     }
                 }
             }
         }
-        String sql = "SELECT " + nameColumn + " FROM " + nameTable + " WHERE " + isChangeNameColumn
-                     + " LIKE '0';";
-        var resultSet = controllerDB.executeQuery(sql);
-        List<String> saveDate = new ArrayList<>();
-        while (resultSet.next()) {
-            saveDate.add(resultSet.getObject(1).toString());
-        }
 
-        String selectQuery = "SELECT ctid FROM " +  nameTable +  " WHERE " +  isChangeNameColumn +  " = '0' ORDER BY ctid";//TUTu
-        resultSet = controllerDB.executeQuery(selectQuery);
-        List<String> ctid = new ArrayList<>();
-        while (resultSet.next()) {
-            ctid.add(resultSet.getObject(1).toString());
-        }
-        // TODO Доделать
-        for (int i = 0; i < saveDate.size(); i++) {
-            var statement = "UPDATE " + nameTable + " SET " + isChangeNameColumn + "=" + "'" + saveDate.get(i) + "'"
-                            + " WHERE ctid = " + ctid.get(i) ;
-            controllerDB.execute(statement);
-        }
         controllerDB.execute("ALTER TABLE " + nameTable + " DROP COLUMN " + nameColumn + ";");
         if (instruct.equals("default")) {
             controllerDB.execute(
