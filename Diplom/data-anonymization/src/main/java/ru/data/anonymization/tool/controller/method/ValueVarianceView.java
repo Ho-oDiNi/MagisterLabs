@@ -68,7 +68,7 @@ public class ValueVarianceView {
             customName.setDisable(true);
             customName.setText(name);
 
-            int value = ((ValueVariance) depersonalizationService.getMethod(name)).getPercent();
+            int value = ((ValueVariance) depersonalizationService.getMethod(name)).getSigma();
             variance.setText(String.valueOf(value));
 
 
@@ -90,12 +90,12 @@ public class ValueVarianceView {
             ValueVariance dto;
             if (depersonalizationService.isContainsKey(customName.getText())) {
                 dto = (ValueVariance) depersonalizationService.getMethod(customName.getText());
-                dto.setPercent(Integer.parseInt(variance.getText()));
+                dto.setSigma(Integer.parseInt(variance.getText()));
             } else {
                 dto = new ValueVariance();
                 dto.setNameTable(table);
                 dto.setNameColumn(column);
-                dto.setPercent(Integer.parseInt(variance.getText()));
+                dto.setSigma(Integer.parseInt(variance.getText()));
                 dto.setDataType(ValueVariance.DataType.valueOf(dataType.toUpperCase(Locale.ROOT)));
             }
 

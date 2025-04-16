@@ -24,7 +24,7 @@
             <TextField fx:id="columnName" minWidth="300" disable="true"/>
         </HBox>
         <HBox VBox.vgrow="ALWAYS" style="-fx-alignment: center;-fx-padding: 10px 0px;">
-            <Label text="Процент шума (0-100):" style="-fx-padding: 0px 10px 0px 0px;"/>
+            <Label text="σ:" style="-fx-padding: 0px 10px 0px 0px;"/>
             <TextField fx:id="variance" minWidth="300"/>
         </HBox>
         <HBox fx:id="buttonContainer" style="-fx-alignment: center;-fx-padding: 10px 0px;" spacing="10"/>

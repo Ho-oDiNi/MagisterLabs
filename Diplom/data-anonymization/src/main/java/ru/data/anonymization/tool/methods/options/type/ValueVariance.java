@@ -16,7 +16,7 @@ public class ValueVariance implements MaskItem {
 
     private String nameTable;
     private String nameColumn;
-    private int percent;
+    private int sigma;
     private DataType dataType;
 
     public enum DataType {
@@ -44,16 +44,16 @@ public class ValueVariance implements MaskItem {
             case INTEGER -> {
                 while (resultSet.next()) {
                     int cur = resultSet.getInt(1);
-                    int per = random.nextInt(percent * 2) - percent;
-                    resultSet.updateInt(1, cur + (cur * per) / 100);
+                    int per = (int)random.nextGaussian() * sigma;
+                    resultSet.updateInt(1, cur + per);
                     resultSet.updateRow();
                 }
             }
             case FLOAT -> {
                 while (resultSet.next()) {
                     double cur = resultSet.getDouble(1);
-                    int per = random.nextInt(percent * 2) - percent;
-                    resultSet.updateDouble(1, cur + (cur * per) / 100);
+                    double per = random.nextGaussian() * sigma;
+                    resultSet.updateDouble(1, cur + per);
                     resultSet.updateRow();
                 }
             }
@@ -63,7 +63,7 @@ public class ValueVariance implements MaskItem {
                     if (cur == null) {
                         continue;
                     }
-                    int per = random.nextInt(percent * 2) - percent;
+                    int per = (int)random.nextGaussian() * sigma;
                     int day = cur.toLocalDate().getDayOfMonth();
                     int month = cur.toLocalDate().getMonthValue();
 
