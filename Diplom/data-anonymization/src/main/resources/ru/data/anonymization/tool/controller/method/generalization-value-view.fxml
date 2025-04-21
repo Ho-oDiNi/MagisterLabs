@@ -42,13 +42,15 @@
                 </items>
             </ComboBox>
         </HBox>
-
+        <Label text="Введите название диапазона:                                  от                           до" style="-fx-padding: 0px 10px 0px 14px;"/>
         <HBox style="-fx-alignment: center;-fx-padding: 10px 0px;">
             <HBox spacing="10" fx:id="valueContainer"/>
+            <Label text="]" style="-fx-padding: 0px 10px 0px 0px;"/>
             <VBox>
                 <Button text="Добавить" onAction="#addElem"/>
             </VBox>
         </HBox>
+
         <ScrollPane minHeight="125" style="-fx-alignment: center;-fx-border-color: grey" fitToWidth="true">
             <VBox fx:id="elementView" style="-fx-padding: 10px 0px;"/>
         </ScrollPane>

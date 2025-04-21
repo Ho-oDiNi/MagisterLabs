@@ -237,7 +237,7 @@ public class GeneralizationValueView {
                 viewElem();
             });
 
-            hBox.getChildren().addAll(nameLabel, new Label(": "), fromLabel, new Label(" -> "), toLabel, remove);
+            hBox.getChildren().addAll(nameLabel, new Label("( "), fromLabel, new Label(" ; "), toLabel, remove);
             elementView.getChildren().add(hBox);
         }
     }
@@ -261,7 +261,7 @@ public class GeneralizationValueView {
                 ((TextField) to).setTextFormatter(new TextFormatter<>(new DoubleStringConverter(), 0.0, integerFilter));
             }
         }
-        valueContainer.getChildren().addAll(name, new Label(": "), from, new Label(" -> "), to);
+        valueContainer.getChildren().addAll(name, new Label("( "), from, new Label(" ; "), to);
     }
 
     private UnaryOperator<TextFormatter.Change> getChangeUnaryOperator() {
