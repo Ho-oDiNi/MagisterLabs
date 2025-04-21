@@ -1,13 +1,10 @@
 package ru.data.anonymization.tool.methods.options.type;
 
-import java.sql.ResultSet;
-import java.util.Date;
+import java.util.List;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.data.anonymization.tool.methods.options.MaskItem;
 import ru.data.anonymization.tool.service.DatabaseConnectionService;
-
-import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -46,7 +43,7 @@ public class RoundDate implements MaskItem {
                     + "'," + nameColumn + ")::date where " + nameColumn + " is not null;";
             controllerDB.execute(sqlExpression);
         } else {
-            throw new Exception("Тип незадан!");
+            throw new Exception("Тип не задан!");
         }
     }
 
