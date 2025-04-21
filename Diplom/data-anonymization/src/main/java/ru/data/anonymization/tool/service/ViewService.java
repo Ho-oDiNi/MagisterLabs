@@ -30,10 +30,12 @@ public class ViewService {
     private final RoundView roundView;
     private final ValueReplacementFromFileView valueReplacementFromFileView;
     private final ValueVarianceView valueVarianceView;
+    private final SelectionMethodView selectionMethodView;
     private final DecompositionView decompositionView;
     private final GeneralizationStringView generalizationStringView;
     private final GeneralizationValueView generalizationValueView;
     private final RoundDateView roundDateView;
+    private final DeleteMethodView deleteMethodView;
 
     //Создаем кнопки для редактирования методов
     public void setConfigMethods(VBox config) {
@@ -96,6 +98,10 @@ public class ViewService {
                         generalizationValueView.configView(nameMethod.getNameRus(), currentTableName, currentColumnName, dateType, ShowMode.CREATE, null, null);
                 case "RoundDate" ->
                         roundDateView.configView(nameMethod.getNameRus(), currentTableName, currentColumnName, ShowMode.CREATE, null, null);
+                case "DeleteMethod" ->
+                        deleteMethodView.configView(nameMethod.getNameRus(), currentTableName, ShowMode.CREATE, null, null);
+                case "SelectionMethod" ->
+                        selectionMethodView.configView(nameMethod.getNameRus(), currentTableName, currentColumnName,  ShowMode.CREATE, null, null);
                 default -> System.out.println("View not found");
             }
         } catch (Exception ignore) {
@@ -140,6 +146,10 @@ public class ViewService {
                         generalizationValueView.configView(nameMethod.getNameRus(), item.getTable(), item.getColumn().get(0), null, ShowMode.EDIT, name, config);
                 case "RoundDate" ->
                         roundDateView.configView(nameMethod.getNameRus(), item.getTable(), item.getColumn().get(0), ShowMode.EDIT, name, config);
+                case "DeleteMethod" ->
+                        deleteMethodView.configView(nameMethod.getNameRus(), item.getTable(), ShowMode.EDIT, name, config);
+                case "SelectionMethod" ->
+                        selectionMethodView.configView(nameMethod.getNameRus(), item.getTable(), item.getColumn().get(0), ShowMode.CREATE, null, null);
                 default -> System.out.println("View not found");
             }
         } catch (Exception ignore) {
