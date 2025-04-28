@@ -62,8 +62,13 @@ public class GeneralizationValue implements MaskItem {
                         + ";");
             }
         }
-
+        List<Object> objects = new ArrayList<>();
         for (int i = 0; i < generalizationName.size(); i++) {
+            objects.add(i + 1);
+            String notInIds = "AND %s NOT IN (%s);".formatted(
+                    isChangeNameColumn,
+                    objectsToString(objects)
+            );
             if (instruct.equals("default")) {
                 controllerDB.execute("INSERT INTO " + generalizationTable + " (value) VALUES ('"
                                      + generalizationName.get(i) + "');");
@@ -74,20 +79,20 @@ public class GeneralizationValue implements MaskItem {
                 System.out.println("UPDATE " + nameTable +
                                    " SET " + isChangeNameColumn + "=" + (i + 1) +
                                    " WHERE " + nameColumn + ">'" + minValue.get(i) +
-                                   "' AND " + nameColumn + "<='" + maxValue.get(i) + "'"
+                                   "' AND " + nameColumn + "<='" + maxValue.get(i) + "'" + notInIds
                 );
                 controllerDB.execute(
                         "UPDATE " + nameTable +
                         " SET " + isChangeNameColumn + "=" + (i + 1) +
                         " WHERE " + nameColumn + ">'" + minValue.get(i) +
-                        "' AND " + nameColumn + "<='" + maxValue.get(i) + "'"
+                        "' AND " + nameColumn + "<='" + maxValue.get(i) + "'" + notInIds
                 );
 
             } else {
                 var changeSql = "UPDATE " + nameTable +
                                 " SET " + isChangeNameColumn + "=" + (i + 1) +
                                 " WHERE " + nameColumn + ">'" + minValue.get(i) + "'" +
-                                " AND " + nameColumn + "<='" + maxValue.get(i) + "'";
+                                " AND " + nameColumn + "<='" + maxValue.get(i) + "'" + notInIds;
                 controllerDB.execute(changeSql);
             }
         }
@@ -125,14 +130,16 @@ public class GeneralizationValue implements MaskItem {
                     if ((size % 2) == 1) {
                         resultSet = controllerDB.executeQuery(
                                 "SELECT " + nameColumn + " FROM " + nameTable + " WHERE "
-                                + nameColumn + " IS NOT NULL and " + isChangeNameColumn + " LIKE '" + i
+                                + nameColumn + " IS NOT NULL and " + isChangeNameColumn + " LIKE '"
+                                + i
                                 + "' ORDER BY " + nameColumn + " OFFSET " + meddle + " LIMIT 1;");
                         resultSet.next();
                         value = resultSet.getLong(1);
                     } else {
                         resultSet = controllerDB.executeQuery(
                                 "SELECT " + nameColumn + " FROM " + nameTable + " WHERE "
-                                + nameColumn + " IS NOT NULL and " + isChangeNameColumn + " LIKE '" + i
+                                + nameColumn + " IS NOT NULL and " + isChangeNameColumn + " LIKE '"
+                                + i
                                 + "' ORDER BY " + nameColumn + " OFFSET " + meddle + " LIMIT 2;");
                         resultSet.next();
                         value = resultSet.getLong(1);
@@ -185,6 +192,17 @@ public class GeneralizationValue implements MaskItem {
                     + ";");
         }
 
+    }
+
+    private String objectsToString(List<Object> objects) {
+        var stringBuilder = new StringBuilder();
+        objects.forEach(object -> {
+            stringBuilder.append("'");
+            stringBuilder.append(object);
+            stringBuilder.append("'");
+            stringBuilder.append(", ");
+        });
+        return stringBuilder.substring(0, stringBuilder.lastIndexOf(","));
     }
 
 }

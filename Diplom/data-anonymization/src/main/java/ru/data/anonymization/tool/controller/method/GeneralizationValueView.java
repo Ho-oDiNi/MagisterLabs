@@ -30,9 +30,9 @@ import java.util.regex.Pattern;
 @Component
 @RequiredArgsConstructor
 public class GeneralizationValueView {
+
     private static final int MAX_LENGTH = 40;
     private final DepersonalizationService depersonalizationService;
-
 
     @FXML
     private TextField newTableName;
@@ -53,7 +53,6 @@ public class GeneralizationValueView {
     @FXML
     private HBox instructionBox;
 
-
     private TextField name;
     private Node from;
     private Node to;
@@ -62,18 +61,31 @@ public class GeneralizationValueView {
 
     @AllArgsConstructor
     static class Value {
+
         public String minValue;
         public String maxValue;
-    }
 
+    }
 
     private Stage stage;
     private boolean isDate = false;
     private String type;
 
-    public void configView(String title, String table, String column, String dateType, ShowMode mode, String name, VBox vBox) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(GeneralizationValueView.class.getResource("generalization-value-view.fxml"));
-        stage = ComponentUtils.modalStageView(fxmlLoader, "Настройка метода (" + title + ")", "gears.png");
+    public void configView(
+            String title,
+            String table,
+            String column,
+            String dateType,
+            ShowMode mode,
+            String name,
+            VBox vBox) throws IOException {
+        FXMLLoader fxmlLoader = new FXMLLoader(GeneralizationValueView.class.getResource(
+                "generalization-value-view.fxml"));
+        stage = ComponentUtils.modalStageView(
+                fxmlLoader,
+                "Настройка метода (" + title + ")",
+                "gears.png"
+        );
         tableName.setText(table);
         columnName.setText(column);
         type = dateType;
@@ -82,7 +94,6 @@ public class GeneralizationValueView {
         }
 
         value = new HashMap<>();
-
 
         Button saveButton = new Button("Сохранить");
         saveButton.setStyle("-fx-background-color: #4bbd50; -fx-text-fill: white;");
@@ -103,7 +114,10 @@ public class GeneralizationValueView {
             List<?> minValue = new ArrayList<>(dto.getMinValue());
             List<?> maxValue = new ArrayList<>(dto.getMaxValue());
             for (int i = 0; i < generalizationName.size(); i++) {
-                value.put(generalizationName.get(i), new Value(minValue.get(i).toString(), maxValue.get(i).toString()));
+                value.put(
+                        generalizationName.get(i),
+                        new Value(minValue.get(i).toString(), maxValue.get(i).toString())
+                );
             }
 
             isDate = dto.isDate();
@@ -137,7 +151,6 @@ public class GeneralizationValueView {
             dto.setInstruct(instruction.getSelectionModel().getSelectedItem());
 
             List<String> generalizationName = new ArrayList<>();
-
 
             if (type.equals("Date")) {
                 List<LocalDate> minValue = new ArrayList<>();
@@ -177,8 +190,10 @@ public class GeneralizationValueView {
             dto.setGeneralizationName(generalizationName);
             dto.setDate(isDate);
             dto.setDateType(type);
-            if (mode.equals(ShowMode.EDIT) || !depersonalizationService.isContainsKey(customName.getText())) {
-                String name = customName.getText().length() < MAX_LENGTH ? customName.getText() : customName.getText().substring(0, MAX_LENGTH);
+            if (mode.equals(ShowMode.EDIT)
+                || !depersonalizationService.isContainsKey(customName.getText())) {
+                String name = customName.getText().length() < MAX_LENGTH ? customName.getText()
+                        : customName.getText().substring(0, MAX_LENGTH);
                 depersonalizationService.addMethod(name, dto);
                 stage.close();
             } else {
@@ -201,9 +216,14 @@ public class GeneralizationValueView {
         } else {
             Value val = null;
             if (type.equals("Date")) {
-                val = new Value(((DatePicker) from).getValue().toString(), ((DatePicker) to).getValue().toString());
+                val = new Value(
+                        ((DatePicker) from).getValue().toString(),
+                        ((DatePicker) to).getValue().toString()
+                );
             } else {
-                if (((TextField) from).getText().isEmpty() || ((TextField) from).getText().isBlank() || ((TextField) to).getText().isEmpty() || ((TextField) to).getText().isBlank()) {
+                if (((TextField) from).getText().isEmpty() || ((TextField) from).getText().isBlank()
+                    || ((TextField) to).getText().isEmpty() || ((TextField) to).getText()
+                                                                               .isBlank()) {
                     DialogBuilder.createErrorDialog("Заполните поля для добовление елемента!");
                 } else {
                     val = new Value(((TextField) from).getText(), ((TextField) to).getText());
@@ -237,7 +257,16 @@ public class GeneralizationValueView {
                 viewElem();
             });
 
-            hBox.getChildren().addAll(nameLabel, new Label("( "), fromLabel, new Label(" ; "), toLabel, remove);
+            hBox.getChildren().addAll(
+                    nameLabel,
+                    new Label("("),
+                    fromLabel,
+                    new Label(";"),
+                    toLabel,
+                    new Label(" ] "),
+
+                    remove
+            );
             elementView.getChildren().add(hBox);
         }
     }
@@ -254,11 +283,27 @@ public class GeneralizationValueView {
             to = new TextField();
             UnaryOperator<TextFormatter.Change> integerFilter = getChangeUnaryOperator();
             if (type.equals("Integer")) {
-                ((TextField) from).setTextFormatter(new TextFormatter<>(new IntegerStringConverter(), 0, integerFilter));
-                ((TextField) to).setTextFormatter(new TextFormatter<>(new IntegerStringConverter(), 0, integerFilter));
+                ((TextField) from).setTextFormatter(new TextFormatter<>(
+                        new IntegerStringConverter(),
+                        0,
+                        integerFilter
+                ));
+                ((TextField) to).setTextFormatter(new TextFormatter<>(
+                        new IntegerStringConverter(),
+                        0,
+                        integerFilter
+                ));
             } else {
-                ((TextField) from).setTextFormatter(new TextFormatter<>(new DoubleStringConverter(), 0.0, integerFilter));
-                ((TextField) to).setTextFormatter(new TextFormatter<>(new DoubleStringConverter(), 0.0, integerFilter));
+                ((TextField) from).setTextFormatter(new TextFormatter<>(
+                        new DoubleStringConverter(),
+                        0.0,
+                        integerFilter
+                ));
+                ((TextField) to).setTextFormatter(new TextFormatter<>(
+                        new DoubleStringConverter(),
+                        0.0,
+                        integerFilter
+                ));
             }
         }
         valueContainer.getChildren().addAll(name, new Label("( "), from, new Label(" ; "), to);
@@ -286,4 +331,5 @@ public class GeneralizationValueView {
         }
         return integerFilter;
     }
+
 }
