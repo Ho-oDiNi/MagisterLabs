@@ -52,7 +52,9 @@ public enum MaskMethods {
     ),
     ValueVariance("ValueVariance", ValueVariance.class, "Метод добавления Шума"),
     DeleteMethod("DeleteMethod", DeleteMethod.class, "Метод удаления"),
-    SelectionMethod("SelectionMethod", SelectionMethod.class, "Метод выборки");
+    SelectionMethod("SelectionMethod", SelectionMethod.class, "Метод выборки"),
+    LocalSuppression("LocalSuppression", LocalSuppression.class, "Метод локального подавления");
+
 
     final String name;
     final Class<?> methodClass;
