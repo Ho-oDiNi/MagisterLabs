@@ -170,8 +170,10 @@ public class LocalSuppressionView {
     @FXML
     private void moveToRight() {
         String selectedItem = leftListView.getSelectionModel().getSelectedItem();
-        leftListView.getItems().remove(selectedItem);
-        rightListView.getItems().add(selectedItem);
+        if (selectedItem != null) {
+            leftListView.getItems().remove(selectedItem);
+            rightListView.getItems().add(selectedItem);
+        }
     }
 
     @FXML
@@ -209,6 +211,7 @@ public class LocalSuppressionView {
             dto.setNameTable(table);
             dto.setN(Integer.parseInt(nChoiceBox.getValue()));
             dto.setNamesColumn(columns);
+            dto.setTableInfoService(tableInfoService);
 
             int k = kChoiceBox.getValue() != null ? Integer.parseInt(kChoiceBox.getValue()) : -1;
             dto.setK(k);
