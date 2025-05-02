@@ -1,7 +1,10 @@
 package ru.data.anonymization.tool.methods.options.type;
 
-import java.sql.SQLException;
+import java.sql.Date;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -53,7 +56,11 @@ public class GeneralizationValue implements MaskItem {
         } else {
             if (isDate) {
                 controllerDB.execute(
-                        "ALTER TABLE " + nameTable + " ADD COLUMN " + newColumn + " DATE;");
+                        "ALTER TABLE " + nameTable + " ADD COLUMN " + newColumn + " DATE;"
+                );
+                controllerDB.execute(
+                        "UPDATE " + nameTable + " SET " + newColumn + " = " + nameColumn
+                );
             } else {
                 controllerDB.execute("ALTER TABLE " + nameTable + " ADD COLUMN " + newColumn
                                      + " FLOAT;");
@@ -96,14 +103,41 @@ public class GeneralizationValue implements MaskItem {
                 controllerDB.execute(changeSql);
             }
         }
+/*        String sql = "SELECT " + isChangeNameColumn + " FROM " + nameTable + ";";
+        System.out.println(sql);
+        try (var resultSet1 = controllerDB.executeQuery(sql)) {
+            while (resultSet1.next()) {
+                System.out.println(resultSet1.getObject(1));
+            }
+        }*/
 
         switch (instruct) {
             case "average" -> {
                 for (int i = 1; i <= countGroup; i++) {
-                    ResultSet resultSet = controllerDB.executeQuery(
-                            "select avg(" + nameColumn + ")" + " FROM " + nameTable + " WHERE "
-                            + nameColumn + " is not null and " + isChangeNameColumn + " LIKE '" + i
-                            + "';");
+                    ResultSet resultSet;
+                    if (dateType.equals("Date")) {
+                        String sql =
+                                """
+                                                SELECT (TO_TIMESTAMP(AVG(EXTRACT(EPOCH FROM %s))))::DATE AS avg_date
+                                                FROM %s
+                                                WHERE %s IS NOT NULL
+                                                AND %s LIKE '%d';
+                                        """.formatted(
+                                        nameColumn,
+                                        nameTable,
+                                        nameColumn,
+                                        isChangeNameColumn,
+                                        i
+                                );
+                        resultSet = controllerDB.executeQuery(sql);
+                    } else {
+                        resultSet = controllerDB.executeQuery(
+                                "select avg(" + nameColumn + ")" + " FROM " + nameTable + " WHERE "
+                                + nameColumn + " is not null and " + isChangeNameColumn + " LIKE '"
+                                + i
+                                + "';");
+                    }
+
                     resultSet.next();
                     Object value = resultSet.getObject(1);
                     if (isDate) {
@@ -124,8 +158,8 @@ public class GeneralizationValue implements MaskItem {
                             + " IS NOT NULL and " + isChangeNameColumn + " LIKE '" + i + "';");
                     resultSet.next();
                     long size = resultSet.getLong(1);
-                    long meddle = (size / 2) - 1;
-                    long value;
+                    long meddle = Math.round((float) size / 2) - 1;
+                    Object value;
 
                     if ((size % 2) == 1) {
                         resultSet = controllerDB.executeQuery(
@@ -134,7 +168,7 @@ public class GeneralizationValue implements MaskItem {
                                 + i
                                 + "' ORDER BY " + nameColumn + " OFFSET " + meddle + " LIMIT 1;");
                         resultSet.next();
-                        value = resultSet.getLong(1);
+                        value = resultSet.getObject(1);
                     } else {
                         resultSet = controllerDB.executeQuery(
                                 "SELECT " + nameColumn + " FROM " + nameTable + " WHERE "
@@ -142,9 +176,20 @@ public class GeneralizationValue implements MaskItem {
                                 + i
                                 + "' ORDER BY " + nameColumn + " OFFSET " + meddle + " LIMIT 2;");
                         resultSet.next();
-                        value = resultSet.getLong(1);
-                        resultSet.next();
-                        value = (value + resultSet.getLong(1)) / 2;
+                        value = resultSet.getObject(1);
+                        if (value instanceof Number number) {
+                            resultSet.next();
+                            value = (number.intValue() + resultSet.getLong(1)) / 2;
+                        } else {
+                            resultSet.next();
+                            LocalDate secValue = resultSet.getDate(1).toLocalDate();
+                            long daysBetween = ChronoUnit.DAYS.between(
+                                    ((Date) value).toLocalDate(),
+                                    secValue
+                            );
+                            value = ((Date) value).toLocalDate().plusDays(daysBetween / 2);
+                        }
+
                     }
 
                     if (isDate) {
