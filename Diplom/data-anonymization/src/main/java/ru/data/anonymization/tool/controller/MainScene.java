@@ -40,19 +40,16 @@ public class MainScene {
     private final DownloadView downloadView;
     private final MaskingView maskingView;
 
-
     private int page = 1;
     private int totalPageCount;
     private Tab currentTab;
     private String currentTableName;
-
 
     private final List<MaskMethods> universalMaskMethods = new ArrayList<>();
     private final List<MaskMethods> stringMaskMethods = new ArrayList<>();
     private final List<MaskMethods> integerMaskMethods = new ArrayList<>();
     private final List<MaskMethods> floatMaskMethods = new ArrayList<>();
     private final List<MaskMethods> dateMaskMethods = new ArrayList<>();
-
 
     @FXML
     private Button startButton;
@@ -126,7 +123,9 @@ public class MainScene {
         refreshTables();
 
         currentPage.textProperty().addListener((observable, oldValue, newValue) -> {
-            if (oldValue.equals(newValue)) return;
+            if (oldValue.equals(newValue)) {
+                return;
+            }
             int value;
             try {
                 value = Integer.parseInt(newValue);
@@ -142,37 +141,50 @@ public class MainScene {
 
         });
 
-        proportionA.setTextFormatter(new TextFormatter<>(new DoubleStringConverter(), 1.0, change -> {
-            String newText = change.getControlNewText();
-            if (newText.matches("(([1-9][0-9]*)|0)?(\\.[0-9]*)?")) {
-                return change;
-            }
-            return null;
-        }));
+        proportionA.setTextFormatter(new TextFormatter<>(
+                new DoubleStringConverter(),
+                1.0,
+                change -> {
+                    String newText = change.getControlNewText();
+                    if (newText.matches("(([1-9][0-9]*)|0)?(\\.[0-9]*)?")) {
+                        return change;
+                    }
+                    return null;
+                }
+        ));
 
-        proportionGlobal.setTextFormatter(new TextFormatter<>(new DoubleStringConverter(), 1.0, change -> {
-            String newText = change.getControlNewText();
-            if (newText.matches("(([1-9][0-9]*)|0)?(\\.[0-9]*)?")) {
-                return change;
-            }
-            return null;
-        }));
+        proportionGlobal.setTextFormatter(new TextFormatter<>(
+                new DoubleStringConverter(),
+                1.0,
+                change -> {
+                    String newText = change.getControlNewText();
+                    if (newText.matches("(([1-9][0-9]*)|0)?(\\.[0-9]*)?")) {
+                        return change;
+                    }
+                    return null;
+                }
+        ));
     }
 
     private void refreshTables() {
+
         //Создаем таблицы
         tabPane.getTabs().clear();
         tabPane.getSelectionModel().selectedItemProperty().addListener(
                 (ov, t, t1) -> {
-                    if (t1 == null) return;
+                    if (t1 == null) {
+                        return;
+                    }
                     page = 1;
-                    currentTableName = t1.getText();
-                    t1.setContent(tableInfoService.buildData(t1.getText(), page));
+                    currentTableName = (String) t1.getUserData(); // Берём оригинал
+                    t1.setContent(tableInfoService.buildData(currentTableName, page));
 
                     currentTab = t1;
                     currentPage.setText(String.valueOf(page));
 
-                    totalPageCount = (int) Math.ceil((double) tableInfoService.getTableSize(t1.getText()) / 500);
+                    totalPageCount = (int) Math.ceil(
+                            (double) tableInfoService.getTableSize((String) t1.getUserData())
+                            / 500);
                     totalPages.setText(String.valueOf(totalPageCount));
 
                     setPreparation();
@@ -180,7 +192,10 @@ public class MainScene {
                 }
         );
         tableInfoService.getTables().forEach(name -> {
-            Tab tab = new Tab(name, new Label("Can't show table"));
+            Tab tab = new Tab();
+            tab.setUserData(name);
+            tab.setText(name.replaceAll("_", "__"));
+            tab.setContent(new Label("Can't show table"));
             tabPane.getTabs().add(tab);
         });
     }
@@ -220,10 +235,14 @@ public class MainScene {
         universalMaskMethods.add(MaskMethods.Identifier);
         universalMaskMethods.add(MaskMethods.Decomposition);
         universalMaskMethods.add(MaskMethods.Shuffle);
-//        universalMaskMethods.add(MaskMethods.ValueReplacement);
-//        universalMaskMethods.add(MaskMethods.ValueReplacementFromFile);
+        universalMaskMethods.add(MaskMethods.DeleteMethod);
+        universalMaskMethods.add(MaskMethods.SelectionMethod);
+        universalMaskMethods.add(MaskMethods.LocalSuppression);
+
+        //        universalMaskMethods.add(MaskMethods.ValueReplacement);
+        //        universalMaskMethods.add(MaskMethods.ValueReplacementFromFile);
         universalMaskMethods.add(MaskMethods.MicroAggregation);
-//        universalMaskMethods.add(MaskMethods.MicroAggregationBySingleAxis);
+        //        universalMaskMethods.add(MaskMethods.MicroAggregationBySingleAxis);
 
         stringMaskMethods.add(MaskMethods.GeneralizationString);
         stringMaskMethods.add(MaskMethods.ValueReplacementByPattern);
@@ -278,7 +297,8 @@ public class MainScene {
 
     @FXML
     private void selectPreparationConfigColumnPreparationList() {
-        String key = currentTableName + "_" + columnPreparationList.getSelectionModel().getSelectedItem();
+        String key = currentTableName + "_" + columnPreparationList.getSelectionModel()
+                                                                   .getSelectedItem();
 
         typeAttributeList.setOnAction(null);
         preparationMethodList.setOnAction(null);
@@ -311,9 +331,13 @@ public class MainScene {
     // Сохранение подготовки
     @FXML
     private void savePreparation() {
-        if (currentTableName == null || columnPreparationList.getSelectionModel().getSelectedItem() == null) return;
+        if (currentTableName == null
+            || columnPreparationList.getSelectionModel().getSelectedItem() == null) {
+            return;
+        }
 
-        String key = currentTableName + "_" + columnPreparationList.getSelectionModel().getSelectedItem();
+        String key = currentTableName + "_" + columnPreparationList.getSelectionModel()
+                                                                   .getSelectedItem();
 
         DataPreparationDto dto = preparationService.getPreparation(key);
         if (dto == null) {
@@ -325,16 +349,24 @@ public class MainScene {
         dto.setTypeAttribute(typeAttributeList.getSelectionModel().getSelectedItem());
         dto.setPreparationMethod(preparationMethodList.getSelectionModel().getSelectedItem());
 
-        if (dto.getTypeAttribute().equals("Insensitive") && dto.getPreparationMethod().equals("none") && dto.getDataType().equals("String")) {
+        if (dto.getTypeAttribute().equals("Insensitive") && dto.getPreparationMethod()
+                                                               .equals("none") && dto.getDataType()
+                                                                                     .equals("String")) {
             preparationService.removeMethod(key);
         } else {
             preparationService.addPreparation(key, dto);
         }
-        System.out.println("Save1: " + currentTableName + "->" + columnPreparationList.getSelectionModel().getSelectedItem() + "  [" + typeAttributeList.getSelectionModel().getSelectedItem() + "," + preparationMethodList.getSelectionModel().getSelectedItem() + "]");
+        System.out.println(
+                "Save1: " + currentTableName + "->" + columnPreparationList.getSelectionModel()
+                                                                           .getSelectedItem()
+                + "  [" + typeAttributeList.getSelectionModel().getSelectedItem() + ","
+                + preparationMethodList.getSelectionModel().getSelectedItem() + "]");
     }
 
     private void savePreparationDataType(String dataType) {
-        if (currentTableName == null || columnList.getSelectionModel().getSelectedItem() == null) return;
+        if (currentTableName == null || columnList.getSelectionModel().getSelectedItem() == null) {
+            return;
+        }
         if (dataType != null && !dataType.isBlank()) {
             String key = currentTableName + "_" + columnList.getSelectionModel().getSelectedItem();
 
@@ -347,12 +379,17 @@ public class MainScene {
                 dto.setPreparationMethod("none");
             }
             dto.setDataType(dateTypeList.getSelectionModel().getSelectedItem());
-            if (dto.getTypeAttribute().equals("Insensitive") && dto.getPreparationMethod().equals("none") && dto.getDataType().equals("String")) {
+            if (dto.getTypeAttribute().equals("Insensitive") && dto.getPreparationMethod().equals(
+                    "none") && dto.getDataType().equals("String")) {
                 preparationService.removeMethod(key);
             } else {
                 preparationService.addPreparation(key, dto);
             }
-            System.out.println("Save2: " + currentTableName + "->" + columnList.getSelectionModel().getSelectedItem() + "  [" + typeAttributeList.getSelectionModel().getSelectedItem() + "," + preparationMethodList.getSelectionModel().getSelectedItem() + "]");
+            System.out.println("Save2: " + currentTableName + "->" + columnList.getSelectionModel()
+                                                                               .getSelectedItem()
+                               + "  [" + typeAttributeList.getSelectionModel().getSelectedItem()
+                               + "," + preparationMethodList.getSelectionModel().getSelectedItem()
+                               + "]");
         }
     }
 
@@ -392,7 +429,8 @@ public class MainScene {
         });
 
         columns.forEach(col -> {
-            List<String> activeColumn = depersonalizationService.getAssessmentConfig(currentTableName);
+            List<String> activeColumn = depersonalizationService.getAssessmentConfig(
+                    currentTableName);
 
             CheckBox checkBox = new CheckBox(col);
             checkBox.setText(col);
@@ -411,7 +449,10 @@ public class MainScene {
                     }
                 }
                 if (!assessmentColumns.isEmpty()) {
-                    depersonalizationService.addAssessmentConfig(currentTableName, assessmentColumns);
+                    depersonalizationService.addAssessmentConfig(
+                            currentTableName,
+                            assessmentColumns
+                    );
                 } else {
                     depersonalizationService.removeAssessmentConfig(currentTableName);
                 }
@@ -428,7 +469,9 @@ public class MainScene {
         savePreparationDataType(dateTypeList.getValue());
 
         masking.getChildren().clear();
-        if (dateTypeList.getValue() == null) return;
+        if (dateTypeList.getValue() == null) {
+            return;
+        }
 
         List<MaskMethods> listOfMethods = null;
         switch (dateTypeList.getValue()) {
@@ -445,7 +488,8 @@ public class MainScene {
 
     //Создаем кнопки для удиверсальных методов обезличивания
     private void setMaskingMethods() {
-        universalMaskMethods.forEach(method -> universalMasking.getChildren().add(createMethodButton(method)));
+        universalMaskMethods.forEach(method -> universalMasking.getChildren()
+                                                               .add(createMethodButton(method)));
     }
 
     public Button createMethodButton(MaskMethods method) {
@@ -474,7 +518,12 @@ public class MainScene {
     }
 
     public void maskConfiguration(MaskMethods nameMethod) {
-        viewService.maskConfiguration(nameMethod, currentTableName, columnList.getSelectionModel().getSelectedItem(), dateTypeList.getSelectionModel().getSelectedItem());
+        viewService.maskConfiguration(
+                nameMethod,
+                currentTableName,
+                columnList.getSelectionModel().getSelectedItem(),
+                dateTypeList.getSelectionModel().getSelectedItem()
+        );
     }
 
     @FXML
@@ -484,7 +533,10 @@ public class MainScene {
 
         statisticService.clearRisk();
         if (ProsecutorMetricA.isSelected()) {
-            statisticService.setRisk(ProsecutorMetricA.getText(), Double.parseDouble(proportionA.getText()));
+            statisticService.setRisk(
+                    ProsecutorMetricA.getText(),
+                    Double.parseDouble(proportionA.getText())
+            );
         }
         if (ProsecutorMetricB.isSelected()) {
             statisticService.setRisk(ProsecutorMetricB.getText(), 0);
@@ -493,7 +545,10 @@ public class MainScene {
             statisticService.setRisk(ProsecutorMetricC.getText(), 0);
         }
         if (GlobalRisk.isSelected()) {
-            statisticService.setRisk(GlobalRisk.getText(), Double.parseDouble(proportionGlobal.getText()));
+            statisticService.setRisk(
+                    GlobalRisk.getText(),
+                    Double.parseDouble(proportionGlobal.getText())
+            );
         }
         Runnable task = () -> {
             Platform.runLater(() -> maskingView.configView("Обезличивание"));
@@ -528,7 +583,10 @@ public class MainScene {
                     }
 
                     for (RiskDto risk : dto.getRisk()) {
-                        statistic.append(risk.getName()).append(": ").append(risk.getResult()).append("\n");
+                        statistic.append(risk.getName())
+                                 .append(": ")
+                                 .append(risk.getResult())
+                                 .append("\n");
                     }
 
                     statisticTitle.setText("Статистика по обезличиванию");
@@ -565,4 +623,5 @@ public class MainScene {
         statisticTitle.setText(null);
         statisticBody.setText(null);
     }
+
 }

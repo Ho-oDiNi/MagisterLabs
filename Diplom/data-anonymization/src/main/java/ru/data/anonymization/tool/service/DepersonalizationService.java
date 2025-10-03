@@ -88,6 +88,9 @@ public class DepersonalizationService {
             init();
             time = masking();
         } catch (Exception e) {
+            System.out.println(e.getLocalizedMessage());
+            System.out.println(e.getMessage());
+            e.printStackTrace();
             controllerDB.disconnect();
         }
         return time;

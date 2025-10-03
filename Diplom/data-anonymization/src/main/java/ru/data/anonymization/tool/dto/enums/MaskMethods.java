@@ -45,7 +45,11 @@ public enum MaskMethods {
                         "ValueReplacementFromFile",
                         ValueReplacementFromFile.class,
                         "Метод маскирования из файла"),
-        ValueVariance("ValueVariance", ValueVariance.class, "Метод Добавления шума");
+        ValueVariance("ValueVariance", ValueVariance.class, "Метод Добавления шума"),
+    DeleteMethod("DeleteMethod", DeleteMethod.class, "Метод удаления"),
+    SelectionMethod("SelectionMethod", SelectionMethod.class, "Метод выборки"),
+    LocalSuppression("LocalSuppression", LocalSuppression.class, "Метод локального подавления");
+
 
         final String name;
         final Class<?> methodClass;
