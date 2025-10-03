@@ -1,0 +1,417 @@
+1.	Периферийный уровень (филиалы/отделения)
+•	Изображается в нижней части диаграммы 3-5 прямоугольниками, обозначающими филиалы
+•	Каждый филиал содержит:
+o	Модуль приема данных (иконка "входящий документ")
+o	Модуль первичной идентификации (иконка "лупа" или "сканер")
+o	Локальное хранилище сырых данных (иконка "база данных" с замком)
+•	Соединяется с региональными центрами стрелками с подписью "Защищенная передача (TLS)"
+2.	Региональный уровень (центры обработки)
+•	Располагается в середине диаграммы 2-3 крупными блоками
+•	Каждый центр включает:
+o	Шлюз безопасности (иконка "щит")
+o	Модуль предварительной обработки (иконка "конвейер")
+o	Буферное хранилище (иконка "база данных" с часами)
+•	Соединяется с центральным узлом двойной стрелкой с подписью "Криптозащищенный канал"
+3.	Центральный уровень (головной офис)
+•	Верхняя часть диаграммы в виде защищенного облака
+•	Основные компоненты:
+o	Ядро обезличивания (центральный круг с иконками:
+	Токенизатор (ключ)
+	Псевдонимизатор (маска)
+	Агрегатор (график)
+o	Система управления ключами (сейф с ключами)
+o	Блокчейн-журнал (цепочка блоков)
+o	Главное хранилище (3 связанных сервера с подписями:
+	Обезличенные данные
+	Таблицы соответствия
+	Метаданные операций
+4.	Дополнительные элементы:
+•	В правом нижнем углу - легенда с обозначениями:
+o	Типы линий соединений
+o	Уровни защиты данных
+o	Условные обозначения компонентов
+•	В левом верхнем углу - логотип системы
+•	По периметру - стилизованный щит, символизирующий защиту
+Рекомендации по визуализации:
+1.	Использовать цветовую дифференциацию:
+•	Красный/оранжевый - для компонентов обработки
+•	Синий - для хранилищ
+•	Зеленый - для защитных механизмов
+2.	Расположить стрелки передачи данных:
+•	Восходящие - сплошные линии
+•	Нисходящие - пунктирные
+•	Синхронизация - волнистые
+3.	Добавить поясняющие надписи:
+•	На компонентах - краткие названия (2-3 слова)
+•	На соединениях - тип передачи данных
+•	Внутри центрального облака - лозунг системы ("Защита через распределение")
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Архитектура системы обезличивания данных</title>
+    <style>
+        canvas {
+            border: 1px solid #ddd;
+            display: block;
+            margin: 0 auto;
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="diagramCanvas" width="1000" height="800"></canvas>
+
+    <script>
+        const canvas = document.getElementById('diagramCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Функция для рисования закругленного прямоугольника
+        function roundedRect(x, y, width, height, radius) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            ctx.lineTo(x + radius, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+        }
+        
+        // Функция для рисования документа
+        function drawDocument(x, y, size) {
+            ctx.fillStyle = '#e3f2fd';
+            ctx.fillRect(x, y, size * 0.8, size);
+            ctx.strokeRect(x, y, size * 0.8, size);
+            
+            // Линии в документе
+            ctx.beginPath();
+            for (let i = 0; i < 4; i++) {
+                ctx.moveTo(x + 5, y + 10 + i * 15);
+                ctx.lineTo(x + size * 0.8 - 5, y + 10 + i * 15);
+            }
+            ctx.strokeStyle = '#2196f3';
+            ctx.stroke();
+            
+            // Стрелка входящая
+            ctx.beginPath();
+            ctx.moveTo(x + size * 0.8 + 5, y + size/2);
+            ctx.lineTo(x + size * 0.8 + 15, y + size/2);
+            ctx.lineTo(x + size * 0.8 + 10, y + size/2 - 5);
+            ctx.moveTo(x + size * 0.8 + 15, y + size/2);
+            ctx.lineTo(x + size * 0.8 + 10, y + size/2 + 5);
+            ctx.strokeStyle = '#4caf50';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+            ctx.lineWidth = 1;
+        }
+        
+        // Функция для рисования лупы
+        function drawMagnifier(x, y, size) {
+            // Ручка
+            ctx.beginPath();
+            ctx.moveTo(x + size * 0.3, y + size * 0.3);
+            ctx.lineTo(x + size * 0.6, y + size * 0.6);
+            ctx.strokeStyle = '#5d4037';
+            ctx.lineWidth = size * 0.1;
+            ctx.stroke();
+            ctx.lineWidth = 1;
+            
+            // Линза
+            ctx.beginPath();
+            ctx.arc(x, y, size * 0.4, 0, Math.PI * 2);
+            ctx.fillStyle = '#e3f2fd';
+            ctx.fill();
+            ctx.strokeStyle = '#1976d2';
+            ctx.stroke();
+            
+            // Увеличение
+            ctx.beginPath();
+            ctx.moveTo(x - size * 0.2, y - size * 0.1);
+            ctx.lineTo(x - size * 0.1, y - size * 0.2);
+            ctx.moveTo(x + size * 0.1, y + size * 0.2);
+            ctx.lineTo(x + size * 0.2, y + size * 0.1);
+            ctx.strokeStyle = '#0d47a1';
+            ctx.stroke();
+        }
+        
+        // Функция для рисования базы данных с замком
+        function drawLockedDatabase(x, y, width, height) {
+            // Основание
+            ctx.beginPath();
+            ctx.ellipse(x + width/2, y + height, width/2, height/8, 0, 0, Math.PI * 2);
+            ctx.fillStyle = '#e1f5fe';
+            ctx.fill();
+            ctx.strokeStyle = '#0288d1';
+            ctx.stroke();
+            
+            // Тело
+            ctx.beginPath();
+            ctx.moveTo(x, y + height);
+            ctx.lineTo(x, y + height/4);
+            ctx.ellipse(x + width/2, y + height/4, width/2, height/4, 0, Math.PI, 0, true);
+            ctx.lineTo(x + width, y + height);
+            ctx.closePath();
+            ctx.fillStyle = '#b3e5fc';
+            ctx.fill();
+            ctx.strokeStyle = '#0288d1';
+            ctx.stroke();
+            
+            // Верхняя часть
+            ctx.beginPath();
+            ctx.ellipse(x + width/2, y, width/2, height/4, 0, 0, Math.PI * 2);
+            ctx.fillStyle = '#4fc3f7';
+            ctx.fill();
+            ctx.strokeStyle = '#0288d1';
+            ctx.stroke();
+            
+            // Замок
+            ctx.beginPath();
+            ctx.rect(x + width/2 - 8, y + height/4 - 5, 16, 10);
+            ctx.arc(x + width/2, y + height/4 - 5, 8, Math.PI, 0);
+            ctx.fillStyle = '#ffc107';
+            ctx.fill();
+            ctx.strokeStyle = '#ff9800';
+            ctx.stroke();
+        }
+        
+        // Функция для рисования щита
+        function drawShield(x, y, size) {
+            ctx.beginPath();
+            ctx.moveTo(x, y + size/4);
+            ctx.lineTo(x + size/2, y);
+            ctx.lineTo(x + size, y + size/4);
+            ctx.lineTo(x + size, y + size);
+            ctx.lineTo(x + size/2, y + size * 0.8);
+            ctx.lineTo(x, y + size);
+            ctx.closePath();
+            
+            const gradient = ctx.createLinearGradient(x, y, x, y + size);
+            gradient.addColorStop(0, '#c8e6c9');
+            gradient.addColorStop(1, '#81c784');
+            
+            ctx.fillStyle = gradient;
+            ctx.fill();
+            ctx.strokeStyle = '#2e7d32';
+            ctx.stroke();
+            
+            // Знак защиты
+            ctx.beginPath();
+            ctx.arc(x + size/2, y + size/2, size/4, 0, Math.PI * 2);
+            ctx.fillStyle = '#2e7d32';
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.moveTo(x + size/2 - size/8, y + size/2);
+            ctx.lineTo(x + size/2, y + size/2 + size/8);
+            ctx.lineTo(x + size/2 + size/6, y + size/2 - size/8);
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.lineWidth = 1;
+        }
+        
+        // Функция для рисования конвейера
+        function drawConveyor(x, y, width, height) {
+            // Основание
+            ctx.fillStyle = '#e0e0e0';
+            ctx.fillRect(x, y + height * 0.7, width, height * 0.3);
+            ctx.strokeRect(x, y + height * 0.7, width, height * 0.3);
+            
+            // Ролики
+            ctx.fillStyle = '#9e9e9e';
+            for (let i = 0; i < 3; i++) {
+                ctx.beginPath();
+                ctx.arc(x + width * 0.2 + i * width * 0.3, y + height * 0.7, height * 0.1, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+            }
+            
+            // Лента
+            ctx.beginPath();
+            ctx.moveTo(x, y + height * 0.6);
+            ctx.lineTo(x + width, y + height * 0.6);
+            ctx.lineTo(x + width, y + height * 0.5);
+            ctx.lineTo(x, y + height * 0.5);
+            ctx.closePath();
+            ctx.fillStyle = '#bcaaa4';
+            ctx.fill();
+            ctx.strokeStyle = '#5d4037';
+            ctx.stroke();
+            
+            // Элементы на конвейере
+            ctx.fillStyle = '#5c6bc0';
+            ctx.fillRect(x + width * 0.1, y + height * 0.4, width * 0.15, height * 0.2);
+            ctx.fillRect(x + width * 0.4, y + height * 0.3, width * 0.15, height * 0.2);
+            ctx.fillRect(x + width * 0.7, y + height * 0.35, width * 0.15, height * 0.2);
+        }
+        
+        // Функция для рисования базы данных с часами
+        function drawTimedDatabase(x, y, width, height) {
+            // Основание
+            ctx.beginPath();
+            ctx.ellipse(x + width/2, y + height, width/2, height/8, 0, 0, Math.PI * 2);
+            ctx.fillStyle = '#e1f5fe';
+            ctx.fill();
+            ctx.strokeStyle = '#0288d1';
+            ctx.stroke();
+            
+            // Тело
+            ctx.beginPath();
+            ctx.moveTo(x, y + height);
+            ctx.lineTo(x, y + height/4);
+            ctx.ellipse(x + width/2, y + height/4, width/2, height/4, 0, Math.PI, 0, true);
+            ctx.lineTo(x + width, y + height);
+            ctx.closePath();
+            ctx.fillStyle = '#b3e5fc';
+            ctx.fill();
+            ctx.strokeStyle = '#0288d1';
+            ctx.stroke();
+            
+            // Верхняя часть
+            ctx.beginPath();
+            ctx.ellipse(x + width/2, y, width/2, height/4, 0, 0, Math.PI * 2);
+            ctx.fillStyle = '#4fc3f7';
+            ctx.fill();
+            ctx.strokeStyle = '#0288d1';
+            ctx.stroke();
+            
+            // Часы
+            ctx.beginPath();
+            ctx.arc(x + width/2, y + height/2, height/4, 0, Math.PI * 2);
+            ctx.fillStyle = '#fff';
+            ctx.fill();
+            ctx.strokeStyle = '#0288d1';
+            ctx.stroke();
+            
+            // Стрелки
+            ctx.beginPath();
+            ctx.moveTo(x + width/2, y + height/2);
+            ctx.lineTo(x + width/2 + height/8 * Math.cos(-Math.PI/4), y + height/2 + height/8 * Math.sin(-Math.PI/4));
+            ctx.moveTo(x + width/2, y + height/2);
+            ctx.lineTo(x + width/2 + height/5 * Math.cos(Math.PI/3), y + height/2 + height/5 * Math.sin(Math.PI/3));
+            ctx.strokeStyle = '#f44336';
+            ctx.stroke();
+            
+            // Цифры
+            ctx.fillStyle = '#0288d1';
+            ctx.font = 'bold 8px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('12', x + width/2, y + height/2 - height/4 + 5);
+            ctx.fillText('3', x + width/2 + height/4 - 5, y + height/2);
+            ctx.fillText('6', x + width/2, y + height/2 + height/4 - 5);
+            ctx.fillText('9', x + width/2 - height/4 + 5, y + height/2);
+        }
+        
+        // Функция для рисования облака
+        function drawCloud(x, y, width, height) {
+            const segments = 8;
+            const segmentAngle = (Math.PI * 2) / segments;
+            const radius = height / 2;
+            
+            ctx.beginPath();
+            for (let i = 0; i < segments; i++) {
+                const angle = segmentAngle * i;
+                const nextAngle = segmentAngle * (i + 1);
+                
+                const offset = (i % 2 === 0) ? radius * 0.9 : radius * 1.1;
+                
+                const x1 = x + width/2 + Math.cos(angle) * offset;
+                const y1 = y + height/2 + Math.sin(angle) * offset;
+                const x2 = x + width/2 + Math.cos(nextAngle) * offset;
+                const y2 = y + height/2 + Math.sin(nextAngle) * offset;
+                
+                if (i === 0) {
+                    ctx.moveTo(x1, y1);
+                }
+                
+                const cx = x + width/2 + Math.cos(angle + segmentAngle/2) * offset * 1.2;
+                const cy = y + height/2 + Math.sin(angle + segmentAngle/2) * offset * 1.2;
+                
+                ctx.quadraticCurveTo(cx, cy, x2, y2);
+            }
+            ctx.closePath();
+            
+            const gradient = ctx.createRadialGradient(
+                x + width/2, y + height/2, 0,
+                x + width/2, y + height/2, radius * 1.5
+            );
+            gradient.addColorStop(0, '#e6f3ff');
+            gradient.addColorStop(1, '#b8d9ff');
+            
+            ctx.fillStyle = gradient;
+            ctx.fill();
+            ctx.strokeStyle = '#5a9bd5';
+            ctx.stroke();
+        }
+        
+        // Функция для рисования ядра обезличивания
+        function drawCore(x, y, size) {
+            // Внешний круг
+            ctx.beginPath();
+            ctx.arc(x, y, size, 0, Math.PI * 2);
+            const gradient = ctx.createRadialGradient(x, y, 0, x, y, size);
+            gradient.addColorStop(0, '#ffecb3');
+            gradient.addColorStop(1, '#ffa000');
+            ctx.fillStyle = gradient;
+            ctx.fill();
+            ctx.strokeStyle = '#ff6f00';
+            ctx.stroke();
+            
+            // Иконки внутри
+            // Ключ (токенизатор)
+            ctx.beginPath();
+            ctx.moveTo(x - size/3, y - size/6);
+            ctx.lineTo(x - size/6, y - size/6);
+            ctx.lineTo(x - size/6, y - size/3);
+            ctx.lineTo(x + size/6, y - size/3);
+            ctx.lineTo(x + size/6, y - size/6);
+            ctx.lineTo(x + size/3, y - size/6);
+            ctx.moveTo(x, y - size/6);
+            ctx.lineTo(x, y + size/6);
+            ctx.arc(x, y + size/6 + size/8, size/8, -Math.PI/2, Math.PI/2);
+            ctx.strokeStyle = '#5d4037';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.lineWidth = 1;
+            
+            // Маска (псевдонимизатор)
+            ctx.beginPath();
+            ctx.ellipse(x - size/3, y + size/3, size/6, size/8, 0, 0, Math.PI * 2);
+            ctx.fillStyle = '#e1f5fe';
+            ctx.fill();
+            ctx.strokeStyle = '#0288d1';
+            ctx.stroke();
+            
+            // Глаза
+            ctx.beginPath();
+            ctx.arc(x - size/3 - size/12, y + size/3 - size/12, size/20, 0, Math.PI * 2);
+            ctx.arc(x - size/3 + size/12, y + size/3 - size/12, size/20, 0, Math.PI * 2);
+            ctx.fillStyle = '#01579b';
+            ctx.fill();
+            
+            // График (агрегатор)
+            ctx.beginPath();
+            ctx.moveTo(x + size/3 - size/4, y + size/3);
+            ctx.lineTo(x + size/3 - size/5, y + size/3 - size/6);
+            ctx.lineTo(x + size/3 - size/8, y + size/3 + size/8);
+            ctx.lineTo(x + size/3, y + size/3 - size/10);
+            ctx.lineTo(x + size/3 + size/8, y + size/3 + size/6);
+            ctx.strokeStyle = '#3949ab';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.lineWidth = 1;
+        }
+        
+        // Функция для рисования сейфа с ключами
+        function drawSafeWithKeys(x, y, size) {
+            // Сейф
+            ctx.fillStyle = '#bcaaa4';
+            ctx.fillRect(x - size/2, y - size/2, size, size * 1.2);
+            ctx.strokeRect(x - size/2, y - size/2, size, size * 1.2);

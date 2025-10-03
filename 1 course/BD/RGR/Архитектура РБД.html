@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Архитектура системы обезличивания данных</title>
+    <style>
+        canvas {
+            border: 1px solid #ddd;
+            display: block;
+            margin: 0 auto;
+            background-color: #f9f9f9;
+        }
+        body {
+            font-family: Arial, sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="diagramCanvas" width="1000" height="800"></canvas>
+
+    <script>
+        const canvas = document.getElementById('diagramCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Функция для рисования закругленного прямоугольника
+        function roundedRect(x, y, width, height, radius) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            ctx.lineTo(x + radius, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+        }
+        
+        // Функция для рисования документа
+        function drawDocument(x, y, size) {
+            ctx.fillStyle = '#fff';
+            ctx.strokeStyle = '#2196F3';
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(x + size, y);
+            ctx.lineTo(x + size * 0.9, y + size * 0.1);
+            ctx.lineTo(x + size * 0.9, y + size);
+            ctx.lineTo(x, y + size);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            
+            // Линии в документе
+            ctx.beginPath();
+            for (let i = 0; i < 3; i++) {
+                ctx.moveTo(x + size * 0.1, y + size * 0.3 + i * size * 0.2);
+                ctx.lineTo(x + size * 0.8, y + size * 0.3 + i * size * 0.2);
+            }
+            ctx.strokeStyle = '#2196F3';
+            ctx.stroke();
+            
+            // Иконка "входящий"
+            ctx.beginPath();
+            ctx.moveTo(x + size * 0.7, y + size * 0.1);
+            ctx.lineTo(x + size * 0.8, y + size * 0.2);
+            ctx.lineTo(x + size * 0.6, y + size * 0.2);
+            ctx.closePath();
+            ctx.fillStyle = '#4CAF50';
+            ctx.fill();
+        }
+        
+        // Функция для рисования лупы
+        function drawMagnifier(x, y, size) {
+            ctx.beginPath();
+            ctx.moveTo(x + size * 0.3, y + size * 0.3);
+            ctx.lineTo(x + size * 0.6, y + size * 0.6);
+            ctx.strokeStyle = '#5d4037';
+            ctx.lineWidth = size * 0.1;
+            ctx.stroke();
+            ctx.lineWidth = 1;
+            
+            ctx.beginPath();
+            ctx.arc(x, y, size * 0.4, 0, Math.PI * 2);
+            ctx.fillStyle = '#e3f2fd';
+            ctx.fill();
+            ctx.strokeStyle = '#1976d2';
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(x - size * 0.2, y - size * 0.1);
+            ctx.lineTo(x - size * 0.1, y - size * 0.2);
+            ctx.moveTo(x + size * 0.1, y + size * 0.2);
+            ctx.lineTo(x + size * 0.2, y + size * 0.1);
+            ctx.strokeStyle = '#0d47a1';
+            ctx.stroke();
+        }
+        
+        // Функция для рисования базы данных с замком
+        function drawLockedDatabase(x, y, width, height) {
+            // Основание
+            ctx.beginPath();
+            ctx.ellipse(x + width/2, y + height, width/2, height/8, 0, 0, Math.PI * 2);
+            ctx.fillStyle = '#e1f5fe';
+            ctx.fill();
+            ctx.strokeStyle = '#0288d1';
+            ctx.stroke();
+            
+            // Тело
+            ctx.beginPath();
+            ctx.moveTo(x, y + height);
+            ctx.lineTo(x, y + height/4);
+            ctx.ellipse(x + width/2, y + height/4, width/2, height/4, 0, Math.PI, 0, true);
+            ctx.lineTo(x + width, y + height);
+            ctx.closePath();
+            ctx.fillStyle = '#b3e5fc';
+            ctx.fill();
+            ctx.strokeStyle = '#0288d1';
+            ctx.stroke();
+            
+            // Верхняя часть
+            ctx.beginPath();
+            ctx.ellipse(x + width/2, y, width/2, height/4, 0, 0, Math.PI * 2);
+            ctx.fillStyle = '#4fc3f7';
+            ctx.fill();
+            ctx.strokeStyle = '#0288d1';
+            ctx.stroke();
+            
+            // Замок
+            ctx.beginPath();
+            ctx.rect(x + width/2 - 6, y + height/3, 12, 10);
+            ctx.arc(x + width/2, y + height/3, 6, Math.PI, 0);
+            ctx.fillStyle = '#FFC107';
+            ctx.fill();
+            ctx.strokeStyle = '#FF9800';
+            ctx.stroke();
+        }
+        
+        // Функция для рисования щита
+        function drawShield(x, y, size) {
+            ctx.beginPath();
+            ctx.moveTo(x, y + size * 0.2);
+            ctx.lineTo(x, y + size * 0.8);
+            ctx.lineTo(x + size * 0.5, y + size);
+            ctx.lineTo(x + size, y + size * 0.8);
+            ctx.lineTo(x + size, y + size * 0.2);
+            ctx.quadraticCurveTo(x + size * 0.5, y - size * 0.1, x, y + size * 0.2);
+            ctx.closePath();
+            
+            const gradient = ctx.createLinearGradient(x, y, x, y + size);
+            gradient.addColorStop(0, '#C8E6C9');
+            gradient.addColorStop(1, '#81C784');
+            
+            ctx.fillStyle = gradient;
+            ctx.fill();
+            ctx.strokeStyle = '#388E3C';
+            ctx.stroke();
+            
+            // Значок замка на щите
+            ctx.beginPath();
+            ctx.rect(x + size * 0.35, y + size * 0.4, size * 0.3, size * 0.2);
+            ctx.arc(x + size * 0.5, y + size * 0.4, size * 0.15, Math.PI, 0);
+            ctx.fillStyle = '#FFD54F';
+            ctx.fill();
+            ctx.strokeStyle = '#F57F17';
+            ctx.stroke();
+        }
+        
+        // Функция для рисования конвейера
+        function drawConveyor(x, y, size) {
+            // Основная линия
+            ctx.beginPath();
+            ctx.moveTo(x - size/2, y);
+            ctx.lineTo(x + size/2, y);
+            ctx.strokeStyle = '#795548';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            ctx.lineWidth = 1;
+            
+            // Ролики
+            for (let i = -1; i <= 1; i++) {
+                ctx.beginPath();
+                ctx.arc(x + i * size/3, y, 5, 0, Math.PI * 2);
+                ctx.fillStyle = '#9E9E9E';
+                ctx.fill();
+                ctx.strokeStyle = '#616161';
+                ctx.stroke();
+            }
+            
+            // Коробки на конвейере
+            ctx.fillStyle = '#FFCC80';
+            ctx.fillRect(x - size/3, y - 10, 15, 8);
+            ctx.strokeRect(x - size/3, y - 10, 15, 8);
+            
+            ctx.fillStyle = '#FFAB91';
+            ctx.fillRect(x, y - 15, 12, 10);
+            ctx.strokeRect(x, y - 15, 12, 10);
+            
+            ctx.fillStyle = '#CE93D8';
+            ctx.fillRect(x + size/4, y - 8, 10, 6);
+            ctx.strokeRect(x + size/4, y - 8, 10, 6);
+        }
+        
+        // Функция для рисования базы данных с часами
+        function drawDatabaseWithClock(x, y, width, height) {
+            // Основание
+            ctx.beginPath();
+            ctx.ellipse(x + width/2, y + height, width/2, height/8, 0, 0, Math.PI * 2);
+            ctx.fillStyle = '#e1f5fe';
+            ctx.fill();
+            ctx.strokeStyle = '#0288d1';
+            ctx.stroke();
+            
+            // Тело
+            ctx.beginPath();
+            ctx.moveTo(x, y + height);
+            ctx.lineTo(x, y + height/4);
+            ctx.ellipse(x + width/2, y + height/4, width/2, height/4, 0, Math.PI, 0, true);
+            ctx.lineTo(x + width, y + height);
+            ctx.closePath();
+            ctx.fillStyle = '#b3e5fc';
+            ctx.fill();
+            ctx.strokeStyle = '#0288d1';
+            ctx.stroke();
+            
+            // Верхняя часть
+            ctx.beginPath();
+            ctx.ellipse(x + width/2, y, width/2, height/4, 0, 0, Math.PI * 2);
+            ctx.fillStyle = '#4fc3f7';
+            ctx.fill();
+            ctx.strokeStyle = '#0288d1';
+            ctx.stroke();
+            
+            // Часы
+            ctx.beginPath();
+            ctx.arc(x + width/2, y + height/2, width/4, 0, Math.PI * 2);
+            ctx.fillStyle = '#fff';
+            ctx.fill();
+            ctx.strokeStyle = '#0288d1';
+            ctx.stroke();
+            
+            // Стрелки часов
+            const time = new Date();
+            const hours = time.getHours() % 12;
+            const minutes = time.getMinutes();
+            
+            // Часовая стрелка
+            ctx.beginPath();
+            ctx.moveTo(x + width/2, y + height/2);
+            ctx.lineTo(
+                x + width/2 + Math.sin(hours * Math.PI / 6) * width/8,
+                y + height/2 - Math.cos(hours * Math.PI / 6) * width/8
+            );
+            ctx.strokeStyle = '#0288d1';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // Минутная стрелка
+            ctx.beginPath();
+            ctx.moveTo(x + width/2, y + height/2);
+            ctx.lineTo(
+                x + width/2 + Math.sin(minutes * Math.PI / 30) * width/6,
+                y + height/2 - Math.cos(minutes * Math.PI / 30) * width/6
+            );
+            ctx.strokeStyle = '#0288d1';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            ctx.lineWidth = 1;
+        }
+        
+        // Функция для рисования облака
+        function drawCloud(x, y, width, height) {
+            const segments = 8;
+            const segmentAngle = (Math.PI * 2) / segments;
+            const radius = height / 2;
+            
+            ctx.beginPath();
+            for (let i = 0; i < segments; i++) {
+                const angle = segmentAngle * i;
+                const nextAngle = segmentAngle * (i + 1);
+                
+                const offset = (i % 2 === 0) ? radius * 0.9 : radius * 1.1;
+                
+                const x1 = x + width/2 + Math.cos(angle) * offset;
+                const y1 = y + height/2 + Math.sin(angle) * offset;
+                const x2 = x + width/2 + Math.cos(nextAngle) * offset;
+                const y2 = y + height/2 + Math.sin(nextAngle) * offset;
+                
+                if (i === 0) {
+                    ctx.moveTo(x1, y1);
+                }
+                
+                const cx = x + width/2 + Math.cos(angle + segmentAngle/2) * offset * 1.2;
+                const cy = y + height/2 + Math.sin(angle + segmentAngle/2) * offset * 1.2;
+                
+                ctx.quadraticCurveTo(cx, cy, x2, y2);
+            }
+            ctx.closePath();
+            
+            const gradient = ctx.createRadialGradient(
+                x + width/2, y + height/2, 0,
+                x + width/2, y + height/2, radius * 1.5
+            );
+            gradient.addColorStop(0, '#e6f3ff');
+            gradient.addColorStop(1, '#b8d9ff');
+            
+            ctx.fillStyle = gradient;
+            ctx.fill();
+            ctx.strokeStyle = '#5a9bd5';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.lineWidth = 1;
+        }
+        
+        // Функция для рисования ключа
+        function drawKey(x, y, size) {
+            ctx.beginPath();
+            ctx.arc(x, y, size * 0.2, 0, Math.PI * 2);
+            ctx.fillStyle = '#FFD54F';
+            ctx.fill();
+            ctx.strokeStyle = '#F57F17';
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(x, y + size * 0.2);
+            ctx.lineTo(x, y + size * 0.6);
+            ctx.lineTo(x - size * 0.2, y + size * 0.5);
+            ctx.lineTo(x, y + size * 0.4);
+            ctx.strokeStyle = '#F57F17';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.lineWidth = 1;
+        }
+        
+        // Функция для рисования маски
+        function drawMask(x, y, size) {
+            ctx.beginPath();
+            ctx.ellipse(x, y, size * 0.4, size * 0.3, 0, 0, Math.PI * 2);
+            ctx.fillStyle = '#e1f5fe';
+            ctx.fill();
+            ctx.strokeStyle = '#0288d1';
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.ellipse(x - size * 0.15, y - size * 0.05, size * 0.08, size * 0.06, 0, 0, Math.PI * 2);
+            ctx.ellipse(x + size * 0.15, y - size * 0.05, size * 0.08, size * 0.06, 0, 0, Math.PI * 2);
+            ctx.fillStyle = '#01579b';
+            ctx.fill();
+        }
+        
+        // Функция для рисования графика
+        function drawChart(x, y, size) {
+            ctx.beginPath();
+            ctx.moveTo(x - size/2, y + size/2);
+            ctx.lineTo(x - size/2, y - size/2);
+            ctx.lineTo(x + size/2, y - size/2);
+            ctx.strokeStyle = '#5c6bc0';
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(x - size/2, y);
+            ctx.lineTo(x - size/3, y - size/4);
+            ctx.lineTo(x - size/6, y + size/6);
+            ctx.lineTo(x, y - size/8);
+            ctx.lineTo(x + size/6, y + size/4);
+            ctx.lineTo(x + size/3, y - size/6);
+            ctx.lineTo(x + size/2, y + size/8);
+            ctx.strokeStyle = '#3949ab';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.lineWidth = 1;
+        }
+        
+        // Функция для рисования сейфа
+        function drawSafe(x, y, size) {
+            // Основная часть
+            ctx.fillStyle = '#BCAAA4';
+            ctx.fillRect(x - size/2, y - size/2, size, size * 1.2);
+            ctx.strokeRect(x - size/2, y - size/2, size, size * 1.2);
+            
+            // Дверь
+            ctx.fillStyle = '#8D6E63';
+            ctx.fillRect(x - size/3, y - size/3, size * 0.66, size * 0.66);
+            ctx.strokeRect(x - size/3, y - size/3, size * 0.66, size * 0.66);
+            
+            // Ручка
+            ctx.beginPath();
+            ctx.arc(x, y, size * 0.1, 0, Math.PI * 2);
+            ctx.fillStyle = '#FFD54F';
+            ctx.fill();
+            ctx.strokeStyle = '#F57F17';
+            ctx.stroke();
+            
+            // Ключевое отверстие
+            ctx.beginPath();
+            ctx.rect(x - size * 0.05, y + size * 0.15, size * 0.1, size * 0.2);
+            ctx.fillStyle = '#000';
+            ctx.fill();
+            
+            // Ключи
+            drawKey(x - size * 0.4, y + size * 0.3, size * 0.4);
+            drawKey(x + size * 0.3, y + size * 0.4, size * 0.3);
+        }
+        
+        // Функция для рисования блокчейна
+        function drawBlockchain(x, y, blockCount, blockWidth, blockHeight) {
+            const gap = 5;
+            const totalWidth = blockCount * blockWidth + (blockCount - 1) * gap;
+            const startX = x - totalWidth / 2;
+            
+            for (let i = 0; i < blockCount; i++) {
+                const blockX = startX + i * (blockWidth + gap);
+                
+                ctx.fillStyle = i % 2 === 0 ? '#e8f5e9' : '#c8e6c9';
+                ctx.fillRect(blockX, y, blockWidth, blockHeight);
+                ctx.strokeRect(blockX, y, blockWidth, blockHeight);
+                
+                ctx.fillStyle = '#2e7d32';
+                ctx.font = '10px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(`Block ${i+1}`, blockX + blockWidth/2, y + blockHeight/2 + 3);
+                
+                if (i < blockCount - 1) {
+                    ctx.beginPath();
+                    ctx.moveTo(blockX + blockWidth, y + blockHeight/2);
+                    ctx.lineTo(blockX + blockWidth + gap, y + blockHeight/2);
+                    ctx.strokeStyle = '#2e7d32';
+                    ctx.stroke();
+                }
+            }
+        }
+        
+        // Функция для рисования сервера
+        function drawServer(x, y, width, height) {
+            // Корпус
+            ctx.fillStyle = '#CFD8DC';
+            ctx.fillRect(x - width/2, y - height/2, width, height);
+            ctx.strokeRect(x - width/2, y - height/2, width, height);
+            
+            // Панель
+            ctx.fillStyle = '#B0BEC5';
+            ctx.fillRect(x - width/2, y - height/2, width, height * 0.2);
+            ctx.strokeRect(x - width/2, y - height/2, width, height * 0.2);
+            
+            // Индикаторы
+            ctx.beginPath();
+            ctx.arc(x - width/3, y, 3, 0, Math.PI * 2);
+            ctx.fillStyle = '#4CAF50';
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.arc(x, y, 3, 0, Math.PI * 2);
+            ctx.fillStyle = '#FFC107';
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.arc(x + width/3, y, 3, 0, Math.PI * 2);
+            ctx.fillStyle = '#F44336';
+            ctx.fill();
+        }
+        
+        // Функция для рисования стрелки
+        function drawArrow(x1, y1, x2, y2, type, label) {
+            const headLength = 10;
+            const angle = Math.atan2(y2 - y1, x2 - x1);
+            
+            // Линия
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            
+            switch(type) {
+                case 'solid':
+                    ctx.strokeStyle = '#4CAF50';
+                    ctx.setLineDash([]);
+                    ctx.lineWidth = 1;
+                    break;
+                case 'dashed':
+                    ctx.strokeStyle = '#F44336';
+                    ctx.setLineDash([5, 3]);
+                    ctx.lineWidth = 1;
+                    break;
+                case 'double':
+                    ctx.strokeStyle = '#2196F3';
+                    ctx.setLineDash([]);
+                    ctx.lineWidth = 2;
+                    break;
+                case 'wavy':
+                    ctx.strokeStyle = '#9C27B0';
+                    // Волнистая линия
+                    const segments = 20;
+                    const dx = (x2 - x1) / segments;
+                    const dy = (y2 - y1) / segments;
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(x1, y1);
+                    
+                    for (let i = 1; i <= segments; i++) {
+                        const cx = x1 + (i - 0.5) * dx;
+                        const cy = y1 + (i - 0.5) * dy;
+                        const offset = (i % 2 === 0) ? 5 : -5;
+                        const px = cx - dy * offset / 10;
+                        const py = cy + dx * offset / 10;
+                        
+                        ctx.quadraticCurveTo(px, py, x1 + i * dx, y1 + i * dy);
+                    }
+                    break;
+            }
+            
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.lineWidth = 1;
+            
+            // Стрелка
+            ctx.beginPath();
+            ctx.moveTo(x2, y2);
+            ctx.lineTo(
+                x2 - headLength * Math.cos(angle - Math.PI/6),
+                y2 - headLength * Math.sin(angle - Math.PI/6)
+            );
+            ctx.lineTo(
+                x2 - headLength * Math.cos(angle + Math.PI/6),
+                y2 - headLength * Math.sin(angle + Math.PI/6)
+            );
+            ctx.closePath();
+            ctx.fillStyle = ctx.strokeStyle;
+            ctx.fill();
+            
+            // Подпись
+            if (label) {
+                ctx.fillStyle = '#333';
+                ctx.font = '10px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(label, (x1 + x2)/2, (y1 + y2)/2 - 10);
+            }
+        }
+        
+        // Функция для рисования легенды
+        function drawLegend(x, y) {
+            const legendWidth = 200;
+            const legendHeight = 180;
+            
+            // Фон легенды
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            ctx.strokeStyle = '#ddd';
+            roundedRect(x, y, legendWidth, legendHeight, 10);
+            
+            // Заголовок
+            ctx.fillStyle = '#333';
+            ctx.font = 'bold 12px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText('Легенда', x + 15, y + 20);
+            
+            // Элементы легенды
+            const items = [
+                { type: 'solid', label: 'Восходящие данные' },
+                { type: 'dashed', label: 'Нисходящие данные' },
+                { type: 'wavy', label: 'Синхронизация' },
+                { type: 'double', label: 'Криптоканал' },
+                { icon: 'database', color: '#0288D1', label: 'Хранилище данных' },
+                { icon: 'shield', color: '#4CAF50', label: 'Компоненты защиты' },
+                { icon: 'gear', color: '#FF9800', label: 'Обработка данных' }
+            ];
+            
+            let yOffset = y + 40;
+            items.forEach(item => {
+                if (item.type) {
+                    drawArrow(x + 15, yOffset - 5, x + 35, yOffset - 5, item.type);
+                } else {
+                    ctx.fillStyle = item.color;
+                    
+                    if (item.icon === 'database') {
+                        drawDatabaseWithClock(x + 25, yOffset - 5, 30, 20);
+                    } else if (item.icon === 'shield') {
+                        drawShield(x + 25, yOffset - 15, 20);
+                    } else if (item.icon === 'gear') {
+                        ctx.beginPath();
+                        ctx.arc(x + 25, yOffset - 5, 8, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.stroke();
+                    }
+                }
+                
+                ctx.fillStyle = '#333';
+                ctx.font = '10px Arial';
+                ctx.fillText(item.label, x + 45, yOffset);
+                yOffset += 25;
+            });
+        }
+        
+        // Функция для рисования логотипа
+        function drawLogo(x, y, size) {
+            // Защитный щит
+            ctx.beginPath();
+            ctx.moveTo(x, y + size * 0.2);
+            ctx.lineTo(x, y + size * 0.8);
+            ctx.lineTo(x + size * 0.5, y + size);
+            ctx.lineTo(x + size, y + size * 0.8);
+            ctx.lineTo(x + size, y + size * 0.2);
+            ctx.quadraticCurveTo(x + size * 0.5, y - size * 0.1, x, y + size * 0.2);
+            ctx.closePath();
+            
+            const gradient = ctx.createLinearGradient(x, y, x, y + size);
+            gradient.addColorStop(0, '#E3F2FD');
+            gradient.addColorStop(1, '#90CAF9');
+            
+            ctx.fillStyle = gradient;
+            ctx.fill();
+            ctx.strokeStyle = '#42A5F5';
+            ctx.stroke();
+            
+            // Буква "З" внутри щита
+            ctx.fillStyle = '#1565C0';
+            ctx.font = `bold ${size * 0.5}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('З', x + size * 0.5, y + size * 0.5);
+            
+            // Название системы
+            ctx.fillStyle = '#333';
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText('SecureAnonym', x + size * 0.5, y + size * 1.2);
+        }
+        
+        // Функция для рисования защитного периметра
+        function drawSecurityPerimeter() {
+            const width = canvas.width - 40;
+            const height = canvas.height - 40;
+            const x = 20;
+            const y = 20;
+            
+            ctx.strokeStyle = '#4CAF50';
+            ctx.lineWidth = 3;
+            ctx.setLineDash([10, 5]);
+            
+            // Внешний щит
+            ctx.beginPath();
+            ctx.roundRect(x, y, width, height, 20);
+            ctx.stroke();
+            
+            // Угловые элементы
+            const cornerSize = 20;
+            
+            // Левый верхний
+            ctx.beginPath();
+            ctx.moveTo(x, y + cornerSize);
+            ctx.lineTo(x, y);
+            ctx.lineTo(x + cornerSize, y);
+            ctx.stroke();
+            
+            // Правый верхний
+            ctx.beginPath();
+            ctx.moveTo(x + width - cornerSize, y);
+            ctx.lineTo(x + width, y);
+            ctx.lineTo(x + width, y + cornerSize);
+            ctx.stroke();
+            
+            // Правый нижний
+            ctx.beginPath();
+            ctx.moveTo(x + width, y + height - cornerSize);
+            ctx.lineTo(x + width, y + height);
+            ctx.lineTo(x + width - cornerSize, y + height);
+            ctx.stroke();
+            
+            // Левый нижний
+            ctx.beginPath();
+            ctx.moveTo(x + cornerSize, y + height);
+            ctx.lineTo(x, y + height);
+            ctx.lineTo(x, y + height - cornerSize);
+            ctx.stroke();
+            
+            ctx.setLineDash([]);
+            ctx.lineWidth = 1;
+        }
+        
+        // Отрисовка всей диаграммы
+        function drawDiagram() {
+            // Защитный периметр
+            drawSecurityPerimeter();
+            
+            // Логотип
+            drawLogo(50, 30, 40);
+            
+            // 1. Периферийный уровень (филиалы/отделения)
+            const branchCount = 4;
+            const branchWidth = 120;
+            const branchHeight = 80;
+            const branchY = canvas.height - 120;
+            const branchSpacing = (canvas.width - 100) / (branchCount - 1);
+            
+            for (let i = 0; i < branchCount; i++) {
+                const branchX = 50 + i * branchSpacing;
+                
+                // Прямоугольник филиала
+                ctx.fillStyle = '#FFEBEE';
+                roundedRect(branchX - branchWidth/2, branchY - branchHeight/2, branchWidth, branchHeight, 10);
+                
+                // Название филиала
+                ctx.fillStyle = '#C62828';
+                ctx.font = 'bold 12px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(`Филиал ${i+1}`, branchX, branchY - 25);
+                
+                // Элементы внутри филиала
+                // Модуль приема данных
+                drawDocument(branchX - 30, branchY - 10, 20);
+                
+                // Модуль первичной идентификации
+                drawMagnifier(branchX, branchY - 10, 20);
+                
+                // Локальное хранилище
+                drawLockedDatabase(branchX + 30, branchY - 5, 30, 20);
+            }
+            
+            // 2. Региональный уровень (центры обработки)
+            const regionCount = 2;
+            const regionWidth = 180;
+            const regionHeight = 120;
+            const regionY = branchY - 180;
+            const regionSpacing = (canvas.width - 100) / (regionCount - 1);
+            
+            for (let i = 0; i < regionCount; i++) {
+                const regionX = 50 + i * regionSpacing;
+                
+                // Прямоугольник региона
+                ctx.fillStyle = '#FFF3E0';
+                roundedRect(regionX - regionWidth/2, regionY - regionHeight/2, regionWidth, regionHeight, 10);
+                
+                // Название региона
+                ctx.fillStyle = '#EF6C00';
+                ctx.font = 'bold 12px Arial';
+                ctx.fillText(`Региональный центр ${i+1}`, regionX, regionY - 40);
+                
+                // Элементы внутри региона
+                // Шлюз безопасности
+                drawShield(regionX - 50, regionY - 10, 30);
+                
+                // Модуль предварительной обработки
+                drawConveyor(regionX, regionY - 10, 60);
+                
+                // Буферное хранилище
+                drawDatabaseWithClock(regionX + 50, regionY - 5, 40, 25);
+                
+                // Соединение с филиалами
+                const connectedBranches = Math.floor(branchCount / regionCount);
+                for (let j = 0; j < connectedBranches; j++) {
+                    const branchIndex = i * connectedBranches + j;
+                    const branchX = 50 + branchIndex * branchSpacing;
+                    
+                    drawArrow(
+                        branchX, branchY - branchHeight/2,
+                        regionX, regionY + regionHeight/2,
+                        'solid', 'Защищенная передача (TLS)'
+                    );
+                }
+            }
+            
+            // 3. Центральный уровень (головной офис)
+            const centerX = canvas.width / 2;
+            const centerY = regionY - 180;
+            
+            // Облако
+            drawCloud(centerX - 200, centerY - 80, 400, 150);
+            
+            // Надпись
+            ctx.fillStyle = '#0D47A1';
+            ctx.font = 'bold 16px Arial';
+            ctx.fillText('Центральный узел обезличивания', centerX, centerY - 50);
+            ctx.font = 'italic 12px Arial';
+            ctx.fillText('Защита через распределение', centerX, centerY - 30);
+            
+            // Ядро обезличивания
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 50, 0, Math.PI * 2);
+            ctx.fillStyle = '#E1F5FE';
+            ctx.fill();
+            ctx.strokeStyle = '#0288D1';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.lineWidth = 1;
+            
+            // Компоненты ядра
+            drawKey(centerX - 25, centerY - 15, 30);
+            ctx.fillStyle = '#333';
+            ctx.font = '10px Arial';
+            ctx.fillText('Токенизатор', centerX - 25, centerY + 30);
+            
+            drawMask(centerX + 25, centerY - 15, 30);
+            ctx.fillStyle = '#333';
+            ctx.fillText('Псевдонимизатор', centerX + 25, centerY + 30);
+            
+            drawChart(centerX, centerY + 25, 30);
+            ctx.fillStyle = '#333';
+            ctx.fillText('Агрегатор', centerX, centerY + 60);
+            
+            // Система управления ключами
+            drawSafe(centerX - 120, centerY, 60);
+            ctx.fillStyle = '#333';
+            ctx.font = '10px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Управление ключами', centerX - 120, centerY + 50);
+            
+            // Блокчейн-журнал
+            drawBlockchain(centerX + 120, centerY - 10, 3, 40, 30);
+            ctx.fillStyle = '#333';
+            ctx.fillText('Блокчейн-журнал', centerX + 120, centerY + 25);
+            
+            // Главное хранилище
+            drawServer(centerX - 50, centerY + 90, 40, 30);
+            drawServer(centerX, centerY + 90, 40, 30);
+            drawServer(centerX + 50, centerY + 90, 40, 30);
+            
+            ctx.fillStyle = '#333';
+            ctx.font = '10px Arial';
+            ctx.fillText('Обезличенные', centerX - 50, centerY + 125);
+            ctx.fillText('данные', centerX - 50, centerY + 135);
+            
+            ctx.fillText('Таблицы', centerX, centerY + 125);
+            ctx.fillText('соответствия', centerX, centerY + 135);
+            
+            ctx.fillText('Метаданные', centerX + 50, centerY + 125);
+            ctx.fillText('операций', centerX + 50, centerY + 135);
+            
+            // Соединение с региональными центрами
+            for (let i = 0; i < regionCount; i++) {
+                const regionX = 50 + i * regionSpacing;
+                
+                drawArrow(
+                    regionX, regionY - regionHeight/2,
+                    centerX, centerY + 75,
+                    'double', 'Криптозащищенный канал'
+                );
+            }
+            
+            // Легенда
+            drawLegend(canvas.width - 220, canvas.height - 200);
+        }
+        
+        // Запуск отрисовки
+        drawDiagram();
+    </script>
+</body>
+</html>

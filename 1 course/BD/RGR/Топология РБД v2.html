@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Архитектура системы обезличивания данных</title>
+    <style>
+      canvas {
+        border: 1px solid #ddd;
+        display: block;
+        margin: 0 auto;
+        background: linear-gradient(to bottom, #ffeeee, #ffffcc, #eeffee);
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="diagramCanvas" width="1000" height="800"></canvas>
+
+    <script>
+      const canvas = document.getElementById("diagramCanvas");
+      const ctx = canvas.getContext("2d");
+
+      // Функция для рисования закругленного прямоугольника
+      function roundedRect(x, y, width, height, radius) {
+        ctx.beginPath();
+        ctx.moveTo(x + radius, y);
+        ctx.lineTo(x + width - radius, y);
+        ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+        ctx.lineTo(x + width, y + height - radius);
+        ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+        ctx.lineTo(x + radius, y + height);
+        ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+        ctx.lineTo(x, y + radius);
+        ctx.quadraticCurveTo(x, y, x + radius, y);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+      }
+
+      // Функция для рисования облака
+      function drawCloud(x, y, width, height) {
+        const segments = 8;
+        const segmentAngle = (Math.PI * 2) / segments;
+        const radius = height / 2;
+
+        ctx.beginPath();
+        for (let i = 0; i < segments; i++) {
+          const angle = segmentAngle * i;
+          const nextAngle = segmentAngle * (i + 1);
+
+          const offset = i % 2 === 0 ? radius * 0.9 : radius * 1.1;
+
+          const x1 = x + width / 2 + Math.cos(angle) * offset;
+          const y1 = y + height / 2 + Math.sin(angle) * offset;
+          const x2 = x + width / 2 + Math.cos(nextAngle) * offset;
+          const y2 = y + height / 2 + Math.sin(nextAngle) * offset;
+
+          if (i === 0) {
+            ctx.moveTo(x1, y1);
+          }
+
+          const cx = x + width / 2 + Math.cos(angle + segmentAngle / 2) * offset * 1.2;
+          const cy = y + height / 2 + Math.sin(angle + segmentAngle / 2) * offset * 1.2;
+
+          ctx.quadraticCurveTo(cx, cy, x2, y2);
+        }
+        ctx.closePath();
+
+        const gradient = ctx.createRadialGradient(
+          x + width / 2,
+          y + height / 2,
+          0,
+          x + width / 2,
+          y + height / 2,
+          radius * 1.5
+        );
+        gradient.addColorStop(0, "#e6f3ff");
+        gradient.addColorStop(1, "#b8d9ff");
+
+        ctx.fillStyle = gradient;
+        ctx.fill();
+        ctx.strokeStyle = "#5a9bd5";
+        ctx.stroke();
+      }
+
+      // Функция для рисования щита безопасности
+      function drawSecurityShield(x, y, width, height) {
+        // Основание щита
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + width, y);
+        ctx.lineTo(x + width * 0.9, y + height * 0.2);
+        ctx.lineTo(x + width * 0.5, y + height);
+        ctx.lineTo(x + width * 0.1, y + height * 0.2);
+        ctx.closePath();
+
+        const gradient = ctx.createLinearGradient(x, y, x, y + height);
+        gradient.addColorStop(0, "rgba(76, 175, 80, 0.2)");
+        gradient.addColorStop(1, "rgba(76, 175, 80, 0.05)");
+
+        ctx.fillStyle = gradient;
+        ctx.fill();
+        ctx.strokeStyle = "#4CAF50";
+        ctx.stroke();
+
+        // Значок замка
+        ctx.beginPath();
+        ctx.rect(x + width * 0.4, y + height * 0.3, width * 0.2, height * 0.2);
+        ctx.arc(x + width * 0.5, y + height * 0.3, width * 0.1, Math.PI, 0);
+        ctx.fillStyle = "#FFC107";
+        ctx.fill();
+        ctx.strokeStyle = "#FF9800";
+        ctx.stroke();
+      }
+
+      // Функция для рисования шестеренки
+      function drawGear(x, y, size, teeth) {
+        const outerRadius = size / 2;
+        const innerRadius = outerRadius * 0.6;
+        const toothDepth = outerRadius * 0.2;
+
+        ctx.beginPath();
+
+        for (let i = 0; i < teeth; i++) {
+          const angle = (i * 2 * Math.PI) / teeth;
+          const nextAngle = ((i + 0.5) * 2 * Math.PI) / teeth;
+
+          const x1 = x + Math.cos(angle) * outerRadius;
+          const y1 = y + Math.sin(angle) * outerRadius;
+
+          const x2 = x + Math.cos(nextAngle) * (outerRadius - toothDepth);
+          const y2 = y + Math.sin(nextAngle) * (outerRadius - toothDepth);
+
+          if (i === 0) {
+            ctx.moveTo(x1, y1);
+          } else {
+            ctx.lineTo(x1, y1);
+          }
+
+          ctx.lineTo(x2, y2);
+        }
+
+        ctx.closePath();
+        ctx.fillStyle = "#5a5a5a";
+        ctx.fill();
+        ctx.strokeStyle = "#333";
+        ctx.stroke();
+
+        // Центральный круг с щитом
+        ctx.beginPath();
+        ctx.arc(x, y, innerRadius, 0, Math.PI * 2);
+        ctx.fillStyle = "#fff";
+        ctx.fill();
+        ctx.strokeStyle = "#333";
+        ctx.stroke();
+
+        // Рисуем щит внутри шестеренки
+        ctx.beginPath();
+        ctx.moveTo(x - innerRadius * 0.5, y + innerRadius * 0.3);
+        ctx.lineTo(x, y - innerRadius * 0.6);
+        ctx.lineTo(x + innerRadius * 0.5, y + innerRadius * 0.3);
+        ctx.lineTo(x - innerRadius * 0.2, y + innerRadius * 0.1);
+        ctx.lineTo(x + innerRadius * 0.2, y + innerRadius * 0.1);
+        ctx.lineTo(x - innerRadius * 0.5, y + innerRadius * 0.3);
+        ctx.fillStyle = "#4CAF50";
+        ctx.fill();
+      }
+
+      // Функция для рисования базы данных
+      function drawDatabase(x, y, width, height) {
+        // Основание
+        ctx.beginPath();
+        ctx.ellipse(x + width / 2, y + height, width / 2, height / 8, 0, 0, Math.PI * 2);
+        ctx.fillStyle = "#e1f5fe";
+        ctx.fill();
+        ctx.strokeStyle = "#0288d1";
+        ctx.stroke();
+
+        // Тело
+        ctx.beginPath();
+        ctx.moveTo(x, y + height);
+        ctx.lineTo(x, y + height / 4);
+        ctx.ellipse(x + width / 2, y + height / 4, width / 2, height / 4, 0, Math.PI, 0, true);
+        ctx.lineTo(x + width, y + height);
+        ctx.closePath();
+        ctx.fillStyle = "#b3e5fc";
+        ctx.fill();
+        ctx.strokeStyle = "#0288d1";
+        ctx.stroke();
+
+        // Верхняя часть
+        ctx.beginPath();
+        ctx.ellipse(x + width / 2, y, width / 2, height / 4, 0, 0, Math.PI * 2);
+        ctx.fillStyle = "#4fc3f7";
+        ctx.fill();
+        ctx.strokeStyle = "#0288d1";
+        ctx.stroke();
+
+        // Ключ
+        ctx.beginPath();
+
+        // Рисуем рукоятку (круг)
+        const handleX = x + width / 2;
+        const handleY = y + height / 2 + 10;
+        const handleRadius = 5;
+        ctx.moveTo(handleX - 3, handleY);
+        ctx.arc(handleX - 8, handleY - 2, handleRadius, 0, Math.PI * 2);
+
+        // Рисуем стержень ключа
+        ctx.moveTo(handleX - 3, handleY);
+        ctx.lineTo(handleX + 15, handleY);
+
+        // Рисуем зубцы ключа
+        ctx.lineTo(handleX + 15, handleY - 5);
+        ctx.lineTo(handleX + 10, handleY - 5);
+        ctx.lineTo(handleX + 10, handleY - 10);
+        ctx.lineTo(handleX + 5, handleY - 10);
+        ctx.lineTo(handleX + 5, handleY - 5);
+        ctx.lineTo(handleX - 5, handleY - 5);
+
+        // Настраиваем стиль
+        ctx.strokeStyle = "#ff9800";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+
+      // Функция для рисования блокчейна
+      function drawBlockchain(x, y, blockCount, blockWidth, blockHeight) {
+        const gap = 5;
+        const totalWidth = blockCount * blockWidth + (blockCount - 1) * gap;
+        const startX = x - totalWidth / 2;
+
+        for (let i = 0; i < blockCount; i++) {
+          const blockX = startX + i * (blockWidth + gap);
+
+          ctx.fillStyle = i % 2 === 0 ? "#e8f5e9" : "#c8e6c9";
+          ctx.fillRect(blockX, y, blockWidth, blockHeight);
+          ctx.strokeRect(blockX, y, blockWidth, blockHeight);
+
+          ctx.fillStyle = "#2e7d32";
+          ctx.font = "10px Arial";
+          ctx.textAlign = "center";
+          ctx.fillText(`Block ${i + 1}`, blockX + blockWidth / 2, y + blockHeight / 2 + 3);
+
+          if (i < blockCount - 1) {
+            ctx.beginPath();
+            ctx.moveTo(blockX + blockWidth, y + blockHeight / 2);
+            ctx.lineTo(blockX + blockWidth + gap, y + blockHeight / 2);
+            ctx.strokeStyle = "#2e7d32";
+            ctx.stroke();
+          }
+        }
+      }
+
+      // Функция для рисования фильтра
+      function drawFilter(x, y, size) {
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + size, y);
+        ctx.lineTo(x + size * 0.7, y + size);
+        ctx.lineTo(x + size * 0.3, y + size);
+        ctx.closePath();
+        ctx.fillStyle = "#bbdefb";
+        ctx.fill();
+        ctx.strokeStyle = "#2196f3";
+        ctx.stroke();
+
+        ctx.beginPath();
+        for (let i = 0; i < 3; i++) {
+          const offset = size * 0.1 + i * size * 0.2;
+          ctx.moveTo(x + offset, y + size * 0.2);
+          ctx.lineTo(x + offset + size * 0.2, y + size * 0.8);
+        }
+        ctx.strokeStyle = "#2196f3";
+        ctx.stroke();
+      }
+
+      // Функция для рисования маски
+      function drawMask(x, y, size) {
+        ctx.beginPath();
+        ctx.ellipse(x, y, size * 0.4, size * 0.3, 0, 0, Math.PI * 2);
+        ctx.fillStyle = "#e1f5fe";
+        ctx.fill();
+        ctx.strokeStyle = "#0288d1";
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.ellipse(x - size * 0.15, y - size * 0.05, size * 0.08, size * 0.06, 0, 0, Math.PI * 2);
+        ctx.ellipse(x + size * 0.15, y - size * 0.05, size * 0.08, size * 0.06, 0, 0, Math.PI * 2);
+        ctx.fillStyle = "#01579b";
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.moveTo(x - size * 0.4, y);
+        ctx.lineTo(x - size * 0.5, y - size * 0.1);
+        ctx.lineTo(x - size * 0.5, y + size * 0.1);
+        ctx.closePath();
+        ctx.moveTo(x + size * 0.4, y);
+        ctx.lineTo(x + size * 0.5, y - size * 0.1);
+        ctx.lineTo(x + size * 0.5, y + size * 0.1);
+        ctx.closePath();
+        ctx.fillStyle = "#b3e5fc";
+        ctx.fill();
+        ctx.strokeStyle = "#0288d1";
+        ctx.stroke();
+      }
+
+      // Функция для рисования графика
+      function drawChart(x, y, size) {
+        ctx.beginPath();
+        ctx.moveTo(x - size / 2, y + size / 2);
+        ctx.lineTo(x - size / 2, y - size / 2);
+        ctx.lineTo(x + size / 2, y - size / 2);
+        ctx.strokeStyle = "#5c6bc0";
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(x - size / 2, y);
+        ctx.lineTo(x - size / 3, y - size / 4);
+        ctx.lineTo(x - size / 6, y + size / 6);
+        ctx.lineTo(x, y - size / 8);
+        ctx.lineTo(x + size / 6, y + size / 4);
+        ctx.lineTo(x + size / 3, y - size / 6);
+        ctx.lineTo(x + size / 2, y + size / 8);
+        ctx.strokeStyle = "#3949ab";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.lineWidth = 1;
+      }
+
+      // Функция для рисования лупы
+      function drawMagnifier(x, y, size) {
+        ctx.beginPath();
+        ctx.moveTo(x + size * 0.3, y + size * 0.3);
+        ctx.lineTo(x + size * 0.6, y + size * 0.6);
+        ctx.strokeStyle = "#5d4037";
+        ctx.lineWidth = size * 0.1;
+        ctx.stroke();
+        ctx.lineWidth = 1;
+
+        ctx.beginPath();
+        ctx.arc(x, y, size * 0.4, 0, Math.PI * 2);
+        ctx.fillStyle = "#e3f2fd";
+        ctx.fill();
+        ctx.strokeStyle = "#1976d2";
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(x - size * 0.2, y - size * 0.1);
+        ctx.lineTo(x - size * 0.1, y - size * 0.2);
+        ctx.moveTo(x + size * 0.1, y + size * 0.2);
+        ctx.lineTo(x + size * 0.2, y + size * 0.1);
+        ctx.strokeStyle = "#0d47a1";
+        ctx.stroke();
+      }
+
+      // Функция для рисования кэш-памяти
+      function drawCache(x, y, size) {
+        ctx.fillStyle = "#fff8e1";
+        ctx.fillRect(x - size / 2, y - size / 2, size, size);
+        ctx.strokeRect(x - size / 2, y - size / 2, size, size);
+
+        ctx.beginPath();
+        for (let i = 0; i < 4; i++) {
+          const offset = -size / 2 + (i * size) / 3;
+          ctx.moveTo(x - size / 2, y + offset);
+          ctx.lineTo(x + size / 2, y + offset);
+        }
+        ctx.strokeStyle = "#ffa000";
+        ctx.stroke();
+
+        ctx.fillStyle = "#ff6f00";
+        ctx.font = "bold 10px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText("Cache", x, y);
+      }
+
+      // Функция для рисования соединений
+      function drawConnection(x1, y1, x2, y2, type) {
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+
+        const midY = (y1 + y2) / 2;
+        ctx.bezierCurveTo(x1, midY, x2, midY, x2, y2);
+
+        switch (type) {
+          case "primary":
+            ctx.strokeStyle = "#4CAF50";
+            ctx.setLineDash([]);
+            break;
+          case "backup":
+            ctx.strokeStyle = "#F44336";
+            ctx.setLineDash([5, 3]);
+            break;
+          case "highspeed":
+            ctx.strokeStyle = "#2196F3";
+            ctx.lineWidth = 2;
+            ctx.setLineDash([]);
+            break;
+          case "secure":
+            ctx.strokeStyle = "#FF9800";
+            ctx.lineWidth = 3;
+            ctx.setLineDash([]);
+
+            break;
+        }
+
+        ctx.stroke();
+        ctx.lineWidth = 1;
+        ctx.setLineDash([]);
+      }
+
+      // Функция для рисования легенды
+      function drawLegend(x, y) {
+        const legendWidth = 200;
+        const legendHeight = 150;
+
+        // Фон легенды
+        ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+        ctx.strokeStyle = "#ddd";
+        roundedRect(x, y, legendWidth, legendHeight, 10);
+
+        // Заголовок
+        ctx.fillStyle = "#333";
+        ctx.font = "bold 12px Arial";
+        ctx.textAlign = "left";
+        ctx.fillText("Легенда", x + 15, y + 20);
+
+        // Элементы легенды
+        const items = [
+          { type: "primary", label: "Основное соединение" },
+          { type: "backup", label: "Резервный канал" },
+          { type: "highspeed", label: "Высокоскоростной канал" },
+          { type: "secure", label: "Криптозащищенный канал" },
+          { color: "#F44336", label: "Обработка персональных данных" },
+          { color: "#2196F3", label: "Передача обезличенной информации" },
+          { color: "#4CAF50", label: "Служебные соединения" },
+        ];
+
+        let yOffset = y + 40;
+        items.forEach((item) => {
+          if (item.type) {
+            if (item.type === "highspeed") {
+              ctx.beginPath();
+              ctx.moveTo(x + 15, yOffset - 5);
+              ctx.lineTo(x + 35, yOffset - 5);
+              ctx.strokeStyle = "#2196F3";
+              ctx.lineWidth = 2;
+              ctx.stroke();
+              ctx.lineWidth = 1;
+            } else {
+              drawConnection(x + 15, yOffset - 5, x + 35, yOffset - 5, item.type);
+            }
+          } else {
+            ctx.fillStyle = item.color;
+            ctx.fillRect(x + 15, yOffset - 8, 20, 6);
+            ctx.strokeRect(x + 15, yOffset - 8, 20, 6);
+          }
+
+          ctx.fillStyle = "#333";
+          ctx.font = "10px Arial";
+          ctx.fillText(item.label, x + 45, yOffset);
+          yOffset += 20;
+        });
+      }
+
+      // Отрисовка всей диаграммы
+      function drawDiagram() {
+        // Центральное облако - Головной офис
+        const centerX = canvas.width / 2;
+        const centerY = 150;
+
+        // Зона безопасности
+        drawSecurityShield(centerX - 220, centerY - 120, 440, 250);
+
+        // Облако
+        drawCloud(centerX - 180, centerY - 80, 360, 120);
+        ctx.fillStyle = "#0d47a1";
+        ctx.font = "bold 14px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText("Центр обезличивания", centerX, centerY - 50);
+        ctx.font = "italic 10px Arial";
+        ctx.fillText("Единая точка управления политиками", centerX, centerY - 35);
+
+        // Элементы внутри облака
+        // 1. Главный сервер управления политиками
+        drawGear(centerX - 110, centerY + 5, 40, 10);
+        ctx.fillStyle = "#000";
+        ctx.fillText("Главный сервер", centerX - 110, centerY + 30);
+        ctx.fillText("управления политиками", centerX - 110, centerY + 43);
+
+        // 2. Мастер-база таблиц соответствия
+        drawDatabase(centerX - 25, centerY - 20, 50, 40);
+        ctx.fillStyle = "#000";
+        ctx.fillText("Мастер-база таблицы", centerX, centerY + 33);
+        ctx.fillText("соответствия", centerX, centerY + 46);
+
+        // 3. Блокчейн-регистратор операций
+        drawBlockchain(centerX + 125, centerY - 10, 4, 35, 30);
+        ctx.fillStyle = "#000";
+        ctx.fillText("Блокчейн-", centerX + 125, centerY + 30);
+        ctx.fillText("регистратор операций", centerX + 125, centerY + 43);
+
+        // Региональные узлы
+        const regionCount = 4;
+        const regionWidth = 160;
+        const regionHeight = 110;
+        const regionY = centerY + 180;
+
+        for (let i = 0; i < regionCount; i++) {
+          const regionX = centerX + (i - (regionCount - 1) / 2) * (regionWidth + 30);
+
+          // Прямоугольник региона
+          ctx.fillStyle = "#fffde7";
+          roundedRect(
+            regionX - regionWidth / 2,
+            regionY - regionHeight / 2,
+            regionWidth,
+            regionHeight,
+            10
+          );
+
+          // Название региона
+          ctx.fillStyle = "#1565c0";
+          ctx.font = "bold 12px Arial";
+          ctx.fillText(`Регион ${i + 1}`, regionX, regionY - 35);
+          ctx.font = "italic 10px Arial";
+          ctx.fillText("Предварительная обработка +", regionX, regionY - 20);
+          ctx.fillText("специализированное обезличивание", regionX, regionY - 7);
+
+          // Элементы внутри региона
+          // Сервер предварительной обработки
+          drawFilter(regionX - 50, regionY + 30, 20);
+
+          // Специализированные модули обезличивания
+          drawMask(regionX - 15, regionY + 45, 20);
+          ctx.beginPath();
+          ctx.arc(regionX + 15, regionY + 44, 7, 0, Math.PI * 2);
+          ctx.fillStyle = "#ff9800";
+          ctx.fill();
+          ctx.strokeStyle = "#e65100";
+          ctx.stroke();
+          drawChart(regionX + 45, regionY + 40, 20);
+
+          // Локальное хранилище
+          drawDatabase(regionX - 10, regionY + 5, 30, 25);
+
+          // Соединение с центральным облаком (криптозащищенное)
+          drawConnection(centerX, centerY + 60, regionX, regionY - 55, "secure");
+
+          // Соединения между региональными центрами (только для соседних)
+          if (i > 0) {
+            const prevRegionX = centerX + (i - 1 - (regionCount - 1) / 2) * (regionWidth + 30);
+            drawConnection(
+              prevRegionX + regionWidth / 2,
+              regionY - 20,
+              regionX - regionWidth / 2,
+              regionY - 20,
+              "highspeed"
+            );
+          }
+        }
+
+        // Филиальные узлы
+        const branchCount = 10;
+        const branchRadius = 20;
+        const branchY = regionY + 180;
+        const branchSpacing = (canvas.width - 100) / (branchCount - 1);
+
+        for (let i = 0; i < branchCount; i++) {
+          const branchX = 50 + i * branchSpacing;
+
+          // Круг филиала
+          ctx.beginPath();
+          ctx.arc(branchX, branchY, branchRadius, 0, Math.PI * 2);
+          ctx.fillStyle = "#ffebee";
+          ctx.fill();
+          ctx.strokeStyle = "#c62828";
+          ctx.stroke();
+
+          // Название филиала
+          ctx.fillStyle = "#b71c1c";
+          ctx.font = "10px Arial";
+          ctx.fillText(`Филиал ${i + 1}`, branchX, branchY + branchRadius + 15);
+          ctx.font = "italic 8px Arial";
+          ctx.fillText("Идентификация +", branchX, branchY + branchRadius + 27);
+          ctx.fillText("локальное кэширование", branchX, branchY + branchRadius + 37);
+
+          // Элементы внутри филиала
+          // Модуль идентификации данных
+          drawMagnifier(branchX - 11, branchY, 15);
+
+          // Кэш часто используемых данных
+          drawCache(branchX + 9, branchY + 2, 15);
+
+          // Соединение с региональным узлом
+          const regionIndex = Math.min(
+            Math.floor(i / (branchCount / regionCount)),
+            regionCount - 1
+          );
+          const regionX = centerX + (regionIndex - (regionCount - 1) / 2) * (regionWidth + 30);
+
+          // Основное соединение
+          drawConnection(regionX, regionY + 55, branchX, branchY - branchRadius, "primary");
+
+          // Резервное соединение (каждый филиал соединяется еще с одним регионом)
+          const backupRegionIndex = (regionIndex + 1) % regionCount;
+          const backupRegionX =
+            centerX + (backupRegionIndex - (regionCount - 1) / 2) * (regionWidth + 30);
+          drawConnection(backupRegionX, regionY + 55, branchX, branchY - branchRadius, "backup");
+        }
+
+        // Легенда
+        drawLegend(canvas.width - 220, canvas.height - 180);
+
+        // Заголовок диаграммы
+        ctx.fillStyle = "#333";
+        ctx.font = "bold 18px Arial";
+        ctx.textAlign = "left";
+        ctx.fillText("Топология системы обезличивания данных", 20, 30);
+      }
+
+      // Запуск отрисовки
+      drawDiagram();
+    </script>
+  </body>
+</html>

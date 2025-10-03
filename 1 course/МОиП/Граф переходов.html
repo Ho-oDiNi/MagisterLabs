@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Граф состояний СМО M/M/5</title>
+    <style>
+        canvas {
+            border: 1px solid #000;
+            margin: 20px;
+        }
+        .container {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Граф состояний системы M/M/5</h2>
+        <canvas id="stateGraph" width="800" height="300"></canvas>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('stateGraph');
+        const ctx = canvas.getContext('2d');
+        
+        // Настройки
+        const circleRadius = 20;
+        const startX = 50;
+        const startY = 150;
+        const stepX = 100;
+        const lambda = 0.2; // λ
+        const mu = 0.1;     // μ
+        
+        // Рисуем состояния
+        function drawState(x, y, label, isSpecial = false) {
+            ctx.beginPath();
+            ctx.arc(x, y, circleRadius, 0, Math.PI * 2);
+            ctx.fillStyle = isSpecial ? '#ffcccb' : '#add8e6';
+            ctx.fill();
+            ctx.stroke();
+            
+            ctx.fillStyle = '#000';
+            ctx.font = '16px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(label, x, y);
+        }
+        
+        // Рисуем стрелку
+        function drawArrow(fromX, fromY, toX, toY, label, curvature = 0) {
+            ctx.beginPath();
+            
+            if (curvature !== 0) {
+                const cp1x = fromX + curvature;
+                const cp1y = fromY - curvature;
+                const cp2x = toX - curvature;
+                const cp2y = toY - curvature;
+                ctx.moveTo(fromX, fromY);
+                ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, toX, toY);
+            } else {
+                ctx.moveTo(fromX + circleRadius, fromY);
+                ctx.lineTo(toX - circleRadius, toY);
+            }
+            
+            ctx.stroke();
+            
+            // Рисуем наконечник стрелки
+            const angle = Math.atan2(toY - fromY, toX - fromX);
+            ctx.save();
+            ctx.translate(toX - circleRadius * Math.cos(angle), toY - circleRadius * Math.sin(angle));
+            ctx.rotate(angle);
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(-10, -5);
+            ctx.lineTo(-10, 5);
+            ctx.closePath();
+            ctx.fillStyle = '#000';
+            ctx.fill();
+            ctx.restore();
+            
+            // Подпись стрелки
+            ctx.fillStyle = '#000';
+            ctx.font = '12px Arial';
+            const midX = (fromX + toX) / 2;
+            const midY = (fromY + toY) / 2;
+            ctx.fillText(label, midX, midY - 15);
+        }
+        
+        // Рисуем граф
+        function drawGraph() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Рисуем состояния от 0 до 7 (можно увеличить)
+            for (let i = 0; i <= 7; i++) {
+                const x = startX + i * stepX;
+                drawState(x, startY, i, i >= 5);
+                
+                // Стрелки вперед (λ)
+                if (i < 7) {
+                    drawArrow(x, startY, x + stepX, startY, `λ = ${lambda}`);
+                }
+                
+                // Стрелки назад (μ)
+                if (i > 0) {
+                    const serviceRate = i <= 5 ? `${i}μ = ${Math.round(i * mu* 10) / 10}` : `5μ = ${5 * mu}`;
+                    drawArrow(x-150, startY+50, x - stepX, startY+50, serviceRate);
+                }
+            }
+            
+            // Добавляем многоточие для неограниченной очереди
+            ctx.fillStyle = '#000';
+            ctx.font = '24px Arial';
+            ctx.fillText('...', startX + 8 * stepX, startY);
+            
+            // Легенда
+            ctx.font = '14px Arial';
+            ctx.fillText('Состояние k - число покупателей в системе', canvas.width/2, 50);
+            ctx.fillStyle = '#add8e6';
+            ctx.fillRect(50, 250, 20, 20);
+            ctx.fillStyle = '#000';
+            ctx.fillText('- свободные продавцы', 150, 265);
+            
+            ctx.fillStyle = '#ffcccb';
+            ctx.fillRect(250, 250, 20, 20);
+            ctx.fillStyle = '#000';
+            ctx.fillText('- все продавцы заняты', 350, 265);
+        }
+        
+        drawGraph();
+    </script>
+</body>
+</html>

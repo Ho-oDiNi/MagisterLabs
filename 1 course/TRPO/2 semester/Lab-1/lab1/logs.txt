@@ -1,0 +1,65 @@
+:90:21: value of is not a member of object java.nio.file.Path       
+    val path = Path.of(System.getProperty("user.dir"), "/char.txt")                                                                                     
+                    ^                                                                                                                                   
+:103:21: value of is not a member of object java.nio.file.Path      
+    val path = Path.of(System.getProperty("user.dir"), "/byte.txt")                                                                                     
+                    ^                                                                                                                                   
+:181:18: not found: value Source
+    val source = Source.fromFile(filename)                                                                                                              
+                 ^                                                                                                                                      
+:191:19: not found: type DataInputStream
+    val dis = new DataInputStream(new FileInputStream(filename))                                                                                        
+                  ^                                                                                                                                     
+:191:39: not found: type FileInputStream
+    val dis = new DataInputStream(new FileInputStream(filename))                                                                                        
+                                      ^                                                                                                                 
+:221:18: not found: type PrintWriter
+    val pw = new PrintWriter(new File(filename))                                                                                                        
+                 ^                                                                                                                                      
+:221:34: not found: type File                                       
+    val pw = new PrintWriter(new File(filename))                                                                                                        
+                                 ^                                                                                                                      
+:230:40: not found: type FileOutputStream                           
+    val dos = new DataOutputStream(new FileOutputStream(filename))                                                                                      
+                                       ^
+:232:20: not found: value wholePart                                 
+      dos.writeInt(wholePart)                                                                                                                           
+                   ^                                                                                                                                    
+:233:20: not found: value numerator
+      dos.writeInt(numerator)                                                                                                                           
+                   ^                                                                                                                                    
+:234:20: not found: value denominator                               
+      dos.writeInt(denominator)                                                                                                                         
+                   ^                                                                                                                                    
+:27:33: not found: type Fraction
+  private var currentFraction1: Fraction = Fraction.of(0, 0, 1)                                                                                         
+                                ^                                                                                                                       
+:27:44: not found: value Fraction                          
+  private var currentFraction1: Fraction = Fraction.of(0, 0, 1)                                                                                         
+                                           ^                                                                                                            
+:28:33: not found: type Fraction                           
+  private var currentFraction2: Fraction = Fraction.of(0, 0, 1)                                                                                         
+                                ^                                                                                                                       
+:28:44: not found: value Fraction
+  private var currentFraction2: Fraction = Fraction.of(0, 0, 1)                                                                                         
+                                           ^                                                                                                            
+:29:31: not found: type Fraction                           
+  private var resultFraction: Fraction = Fraction.of(0, 0, 1)                                                                                           
+                              ^                                                                                                                         
+:29:42: not found: value Fraction
+  private var resultFraction: Fraction = Fraction.of(0, 0, 1)                                                                                           
+                                         ^                                                                                                              
+:66:30: not found: value Fraction
+          currentFraction1 = Fraction.of(                                                                                                               
+                             ^                                                                                                                          
+:71:30: not found: value Fraction
+          currentFraction2 = Fraction.of(                                                                                                               
+                             ^                                                                                                                          
+:236:11: not found: value Fraction
+          Fraction.readFromBinaryFile(file.getAbsolutePath)                                                                                             
+          ^                                                                                                                                             
+:238:11: not found: value Fraction                         
+          Fraction.readFromTextFile(file.getAbsolutePath)                                                                                               
+          ^                                                                                                                                             
+:241:9: not found: value updateResult                      
+        updateResult()

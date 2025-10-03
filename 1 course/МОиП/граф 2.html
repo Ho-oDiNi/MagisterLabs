@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Граф состояний СМО M/M/5 с ограничениями</title>
+    <style>
+        canvas {
+            border: 1px solid #000;
+            margin: 20px;
+        }
+        .container {
+            text-align: center;
+        }
+        .info {
+            margin: 20px;
+            text-align: left;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Граф состояний системы M/M/5 с ограничениями</h2>
+        <canvas id="stateGraph" width="900" height="500"></canvas>
+    </div>
+
+
+    <script>
+        const canvas = document.getElementById('stateGraph');
+        const ctx = canvas.getContext('2d');
+        
+        // Настройки
+        const circleRadius = 20;
+        const startX = 50;
+        const startY = 200;
+        const stepX = 100;
+        const lambda = 0.2; // λ
+        const baseMu = 0.1; // Базовая μ
+        
+        // Функция для вычисления текущей μ в зависимости от времени
+        function getCurrentMu(hours) {
+            if (hours < 2) return baseMu;
+            if (hours < 4) return baseMu * 0.9;
+            if (hours < 6) return baseMu * 0.8;
+            return baseMu * 0.75;
+        }
+        
+        // Рисуем состояния
+        function drawState(x, y, label, isSpecial = false, isRejected = false) {
+            ctx.beginPath();
+            ctx.arc(x, y, circleRadius, 0, Math.PI * 2);
+            ctx.fillStyle = isRejected ? '#ff9999' : (isSpecial ? '#ffcccb' : '#add8e6');
+            ctx.fill();
+            ctx.stroke();
+            
+            ctx.fillStyle = '#000';
+            ctx.font = '16px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(label, x, y);
+            
+            if (isRejected) {
+                ctx.strokeStyle = '#f00';
+                ctx.beginPath();
+                ctx.moveTo(x - circleRadius*0.7, y - circleRadius*0.7);
+                ctx.lineTo(x + circleRadius*0.7, y + circleRadius*0.7);
+                ctx.moveTo(x + circleRadius*0.7, y - circleRadius*0.7);
+                ctx.lineTo(x - circleRadius*0.7, y + circleRadius*0.7);
+                ctx.stroke();
+            }
+        }
+        
+        // Рисуем стрелку
+        function drawArrow(fromX, fromY, toX, toY, label, isBackward = false, isReject = false) {
+            ctx.beginPath();
+            ctx.strokeStyle = isReject ? '#f00' : '#000';
+            
+            // Для обратных стрелок делаем изгиб
+            if (isBackward) {
+                const controlY = fromY - 50;
+                ctx.moveTo(fromX, fromY - circleRadius);
+                ctx.quadraticCurveTo((fromX + toX)/2, controlY, toX, toY + circleRadius);
+            } 
+            // Для стрелок отказа рисуем вниз
+            else if (isReject) {
+                const controlY = fromY + 50;
+                ctx.moveTo(fromX, fromY + circleRadius);
+                ctx.quadraticCurveTo((fromX + toX)/2, controlY, toX, toY - circleRadius);
+            }
+            // Обычные стрелки вперед
+            else {
+                ctx.moveTo(fromX + circleRadius, fromY);
+                ctx.lineTo(toX - circleRadius, toY);
+            }
+            
+            ctx.stroke();
+            
+            // Рисуем наконечник стрелки
+            const angle = isReject 
+                ? Math.atan2((toY - circleRadius) - (fromY + circleRadius), toX - fromX)
+                : isBackward 
+                    ? Math.atan2((toY + circleRadius) - (fromY - circleRadius), toX - fromX)
+                    : Math.atan2(toY - fromY, toX - fromX);
+                
+            const tipX = isReject || isBackward
+                ? toX - circleRadius * Math.cos(angle)
+                : toX - circleRadius * Math.cos(angle);
+                
+            const tipY = isReject
+                ? toY - circleRadius - circleRadius * Math.sin(angle)
+                : isBackward
+                    ? toY + circleRadius - circleRadius * Math.sin(angle)
+                    : toY - circleRadius * Math.sin(angle);
+                
+            ctx.save();
+            ctx.translate(tipX, tipY);
+            ctx.rotate(angle);
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(-10, -5);
+            ctx.lineTo(-10, 5);
+            ctx.closePath();
+            ctx.fillStyle = isReject ? '#f00' : '#000';
+            ctx.fill();
+            ctx.restore();
+            
+            // Подпись стрелки
+            ctx.fillStyle = isReject ? '#f00' : '#000';
+            ctx.font = '12px Arial';
+            const midX = (fromX + toX) / 2;
+            let midY = (fromY + toY) / 2;
+            
+            if (isBackward) {
+                midY = ((fromY - 50) + (toY + 50)) / 2;
+            } else if (isReject) {
+                midY = ((fromY + 50) + (toY - 50)) / 2;
+            }
+            
+            ctx.fillText(label, midX, midY - (isBackward ? 30 : (isReject ? -30 : 15)));
+        }
+        
+        // Рисуем граф
+        function drawGraph() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Рисуем состояния от 0 до 7 (k=7 - очередь 2, новый уходит)
+            for (let i = 0; i <= 7; i++) {
+                const x = startX + i * stepX;
+                const isRejected = i === 7;
+                drawState(x, startY, i, i >= 5, isRejected);
+                
+                // Стрелки вперед (λ)
+                if (i < 7) {
+                    drawArrow(x, startY, x + stepX, startY, `λ = ${Math.round(lambda* 10) / 10}`);
+                }
+                
+                // Стрелка отказа (при k=7)
+                if (i === 7) {
+                    drawArrow(x, startY+100, x + stepX, startY+20, "Отказ", false, true);
+                }
+                
+                // Стрелки назад (μ)
+                if (i > 0) {
+                    const mu = getCurrentMu(0); // Можно передать текущее время
+                    const serviceRate = i <= 5 
+                        ? `${i}μ = ${(i * mu).toFixed(1)}` 
+                        : `5μ = ${(5 * mu).toFixed(1)}`;
+                    drawArrow(x, startY+100, x - stepX, startY+20, serviceRate, true);
+                }
+            }
+            
+            // Легенда
+            ctx.font = '14px Arial';
+            ctx.fillStyle = '#000';
+            ctx.fillText('Состояние k - число покупателей в системе (0-5 обслуживание, 6-7 очередь)', canvas.width/2, 50);
+            
+            // Цвета состояний
+            ctx.fillStyle = '#add8e6';
+            ctx.fillRect(50, 350, 20, 20);
+            ctx.strokeRect(50, 350, 20, 20);
+            ctx.fillStyle = '#000';
+            ctx.fillText('- свободные продавцы', 180, 365);
+            
+            ctx.fillStyle = '#ffcccb';
+            ctx.fillRect(50, 380, 20, 20);
+            ctx.strokeRect(50, 380, 20, 20);
+            ctx.fillStyle = '#000';
+            ctx.fillText('- все продавцы заняты', 180, 395);
+            
+            ctx.fillStyle = '#ff9999';
+            ctx.fillRect(50, 410, 20, 20);
+            ctx.strokeRect(50, 410, 20, 20);
+            ctx.strokeStyle = '#f00';
+            ctx.beginPath();
+            ctx.moveTo(50 + 6, 410 + 6);
+            ctx.lineTo(50 + 20 - 6, 410 + 20 - 6);
+            ctx.moveTo(50 + 20 - 6, 410 + 6);
+            ctx.lineTo(50 + 6, 410 + 20 - 6);
+            ctx.stroke();
+            ctx.fillStyle = '#000';
+            ctx.fillText('- состояние отказа (покупатель уходит)', 235, 425);
+            
+
+        }
+        
+        drawGraph();
+    </script>
+</body>
+</html>

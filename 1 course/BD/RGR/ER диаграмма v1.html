@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ER-диаграмма системы обезличивания данных</title>
+    <style>
+        canvas {
+            border: 1px solid #ddd;
+            margin: 20px;
+            background-color: #f9f9f9;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <h1>ER-диаграмма системы обезличивания данных</h1>
+    <canvas id="erCanvas" width="1200" height="800"></canvas>
+
+    <script>
+        const canvas = document.getElementById('erCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Настройки стилей
+        const entityColor = '#e1f5fe';
+        const specialEntityColor = '#e8f5e9';
+        const attributeColor = '#bbdefb';
+        const relationshipColor = '#ffccbc';
+        const textColor = '#212121';
+        const lineColor = '#424242';
+        
+        // Функция для рисования прямоугольника с закругленными углами
+        function roundedRect(x, y, width, height, radius) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            ctx.lineTo(x + radius, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+        }
+        
+        // Функция для рисования сущности
+        function drawEntity(x, y, width, height, title, attributes, isSpecial = false) {
+            // Рисуем основную часть сущности
+            ctx.fillStyle = isSpecial ? specialEntityColor : entityColor;
+            roundedRect(x, y, width, height, 10);
+            ctx.fill();
+            ctx.strokeStyle = lineColor;
+            ctx.stroke();
+            
+            // Рисуем заголовок
+            ctx.fillStyle = '#0d47a1';
+            ctx.font = 'bold 14px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(title, x + width/2, y + 20);
+            
+            // Рисуем разделительную линию
+            ctx.beginPath();
+            ctx.moveTo(x, y + 30);
+            ctx.lineTo(x + width, y + 30);
+            ctx.stroke();
+            
+            // Рисуем атрибуты
+            ctx.fillStyle = textColor;
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'left';
+            
+            attributes.forEach((attr, i) => {
+                // Рисуем прямоугольник атрибута
+                ctx.fillStyle = attributeColor;
+                roundedRect(x + 5, y + 35 + i*20, width - 10, 18, 5);
+                ctx.fill();
+                ctx.strokeStyle = lineColor;
+                ctx.stroke();
+                
+                // Текст атрибута
+                ctx.fillStyle = textColor;
+                ctx.fillText(attr, x + 10, y + 48 + i*20);
+            });
+        }
+        
+        // Функция для рисования отношения
+        function drawRelationship(x, y, width, height, title) {
+            // Рисуем ромб
+            ctx.fillStyle = relationshipColor;
+            ctx.beginPath();
+            ctx.moveTo(x, y + height/2);
+            ctx.lineTo(x + width/2, y);
+            ctx.lineTo(x + width, y + height/2);
+            ctx.lineTo(x + width/2, y + height);
+            ctx.closePath();
+            ctx.fill();
+            ctx.strokeStyle = lineColor;
+            ctx.stroke();
+            
+            // Текст отношения
+            ctx.fillStyle = '#bf360c';
+            ctx.font = 'bold 12px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(title, x + width/2, y + height/2 + 4);
+        }
+        
+        // Функция для рисования линии связи
+        function drawConnection(x1, y1, x2, y2, label1, label2, isOneToMany = false, isManyToMany = false) {
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.strokeStyle = lineColor;
+            ctx.stroke();
+            
+            // Рисуем метки кардинальности
+            if (label1) {
+                ctx.fillStyle = textColor;
+                ctx.font = '10px Arial';
+                ctx.textAlign = 'center';
+                
+                // Позиционируем метку ближе к первой точке
+                const labelX = x1 + (x2 - x1) * 0.2;
+                const labelY = y1 + (y2 - y1) * 0.2 - 5;
+                ctx.fillText(label1, labelX, labelY);
+            }
+            
+            if (label2) {
+                ctx.fillStyle = textColor;
+                ctx.font = '10px Arial';
+                ctx.textAlign = 'center';
+                
+                // Позиционируем метку ближе ко второй точке
+                const labelX = x1 + (x2 - x1) * 0.8;
+                const labelY = y1 + (y2 - y1) * 0.8 - 5;
+                ctx.fillText(label2, labelX, labelY);
+            }
+            
+            // Рисуем обозначения "один" или "много"
+            if (isOneToMany || isManyToMany) {
+                const endX = x1 + (x2 - x1) * 0.9;
+                const endY = y1 + (y2 - y1) * 0.9;
+                
+                if (isManyToMany) {
+                    // Рисуем два конца "много"
+                    ctx.beginPath();
+                    ctx.moveTo(endX - 5, endY - 5);
+                    ctx.lineTo(endX + 5, endY + 5);
+                    ctx.moveTo(endX - 5, endY + 5);
+                    ctx.lineTo(endX + 5, endY - 5);
+                    ctx.stroke();
+                    
+                    const startX = x1 + (x2 - x1) * 0.1;
+                    const startY = y1 + (y2 - y1) * 0.1;
+                    ctx.beginPath();
+                    ctx.moveTo(startX - 5, startY - 5);
+                    ctx.lineTo(startX + 5, startY + 5);
+                    ctx.moveTo(startX - 5, startY + 5);
+                    ctx.lineTo(startX + 5, startY - 5);
+                    ctx.stroke();
+                } else {
+                    // Рисуем один конец "много"
+                    ctx.beginPath();
+                    ctx.moveTo(endX - 5, endY - 5);
+                    ctx.lineTo(endX + 5, endY + 5);
+                    ctx.moveTo(endX - 5, endY + 5);
+                    ctx.lineTo(endX + 5, endY - 5);
+                    ctx.stroke();
+                }
+            }
+        }
+        
+        // Рисуем сущности
+        drawEntity(100, 100, 200, 180, 'Персональные данные', [
+            'ID_данных (PK)',
+            'Тип_данных',
+            'Значение',
+            'Дата_поступления',
+            'Степень_конфиденциальности'
+        ]);
+        
+        drawEntity(450, 100, 200, 140, 'Обезличенные данные', [
+            'ID_преобразования (PK)',
+            'Преобразованное_значение',
+            'Метод_обезличивания',
+            'Дата_трансформации'
+        ]);
+        
+        drawEntity(300, 350, 200, 140, 'Таблица соответствия', [
+            'ID_соответствия (PK)',
+            'ID_оригинала (FK)',
+            'ID_преобразования (FK)',
+            'Хэш_ключа',
+            'Срок_хранения'
+        ]);
+        
+        drawEntity(100, 500, 200, 120, 'Узлы хранения', [
+            'ID_узла (PK)',
+            'Тип_узла',
+            'Гео_локация',
+            'Уровень_защиты'
+        ]);
+        
+        drawEntity(700, 100, 200, 120, 'Операции обезличивания', [
+            'ID_операции',
+            'ID_пользователя',
+            'ID_алгоритма',
+            'Статус',
+            'Временная_метка'
+        ], true);
+        
+        drawEntity(700, 300, 200, 100, 'Политики доступа', [
+            'ID_политики',
+            'Роль',
+            'Уровень_доступа',
+            'Срок_действия'
+        ], true);
+        
+        // Рисуем отношения
+        drawRelationship(350, 200, 100, 60, 'подвергается');
+        drawRelationship(550, 350, 100, 60, 'связано');
+        drawRelationship(200, 400, 100, 60, 'хранится');
+        drawRelationship(200, 300, 100, 60, 'реплицирует');
+        
+        // Рисуем связи между сущностями
+        // Персональные данные -> подвергается
+        drawConnection(300, 180, 350, 230, '1', 'N', true);
+        // подвергается -> Обезличенные данные
+        drawConnection(450, 230, 400, 180, '', '', false);
+        
+        // Обезличенные данные -> связано
+        drawConnection(650, 170, 600, 350, '1', '1', false);
+        // связано -> Таблица соответствия
+        drawConnection(550, 410, 500, 350, '', '', false);
+        
+        // Персональные данные -> Таблица соответствия
+        drawConnection(200, 180, 300, 350, '1', '1', false);
+        
+        // Таблица соответствия -> хранится
+        drawConnection(300, 490, 200, 500, 'N', '1', true);
+        // хранится -> Узлы хранения
+        drawConnection(200, 560, 300, 550, '', '', false);
+        
+        // Узлы хранения -> реплицирует
+        drawConnection(100, 560, 200, 330, 'N', 'M', false, true);
+        // реплицирует -> Узлы хранения
+        drawConnection(200, 330, 300, 560, '', '', false);
+        
+        // Операции обезличивания -> Персональные данные
+        drawConnection(700, 170, 300, 170, '', '', false);
+        
+        // Политики доступа -> Таблица соответствия
+        drawConnection(700, 350, 500, 350, '', '', false);
+    </script>
+</body>
+</html>

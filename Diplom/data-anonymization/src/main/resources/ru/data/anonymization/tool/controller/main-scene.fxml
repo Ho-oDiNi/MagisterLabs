@@ -125,7 +125,7 @@
                 </Tab>
 
 
-                <Tab text="Обезличивание">
+                <Tab text="Анонимизация">
                     <ScrollPane minWidth="400" prefHeight="1" VBox.vgrow="ALWAYS" styleClass="sidebar"
                                 fitToWidth="true">
                         <VBox spacing="5" style="-fx-padding: 5px;">
@@ -154,7 +154,7 @@
                                     </ComboBox>
                                 </HBox>
                             </VBox>
-                            <Label text="Методы обезличивания:" styleClass="labelTitle"/>
+                            <Label text="Обезличивание на основе методов изменения состава и/или семантики :" styleClass="labelTitle"/>
                             <VBox fx:id="masking" spacing="5" alignment="TOP_CENTER"/>
                             <Label text="Универсальные методы обезличивания:" styleClass="labelTitle"/>
                             <VBox fx:id="universalMasking" spacing="5" alignment="TOP_CENTER"/>

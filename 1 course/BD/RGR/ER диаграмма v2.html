@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>ER-диаграмма системы обезличивания данных</title>
+    <style>
+      canvas {
+        border: 1px solid #ddd;
+        margin: 20px;
+        background-color: #f9f9f9;
+      }
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      h1 {
+        color: #333;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>ER-диаграмма системы обезличивания данных</h1>
+    <canvas id="erCanvas" width="1400" height="900"></canvas>
+
+    <script>
+      const canvas = document.getElementById("erCanvas");
+      const ctx = canvas.getContext("2d");
+
+      // Настройки стилей
+      const entityColor = "#e1f5fe";
+      const specialEntityColor = "#e8f5e9";
+      const attributeColor = "#bbdefb";
+      const relationshipColor = "#ffccbc";
+      const textColor = "#212121";
+      const lineColor = "#424242";
+
+      // Функция для рисования прямоугольника с закругленными углами
+      function roundedRect(x, y, width, height, radius) {
+        ctx.beginPath();
+        ctx.moveTo(x + radius, y);
+        ctx.lineTo(x + width - radius, y);
+        ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+        ctx.lineTo(x + width, y + height - radius);
+        ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+        ctx.lineTo(x + radius, y + height);
+        ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+        ctx.lineTo(x, y + radius);
+        ctx.quadraticCurveTo(x, y, x + radius, y);
+        ctx.closePath();
+      }
+
+      // Функция для рисования сущности
+      function drawEntity(x, y, width, height, title, attributes, isSpecial = false) {
+        // Рисуем основную часть сущности
+        ctx.fillStyle = isSpecial ? specialEntityColor : entityColor;
+        roundedRect(x, y, width, height, 10);
+        ctx.fill();
+        ctx.strokeStyle = lineColor;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        // Рисуем заголовок
+        ctx.fillStyle = "#0d47a1";
+        ctx.font = "bold 14px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText(title, x + width / 2, y + 20);
+
+        // Рисуем разделительную линию
+        ctx.beginPath();
+        ctx.moveTo(x, y + 30);
+        ctx.lineTo(x + width, y + 30);
+        ctx.stroke();
+
+        // Рисуем атрибуты
+        ctx.fillStyle = textColor;
+        ctx.font = "12px Arial";
+        ctx.textAlign = "left";
+
+        attributes.forEach((attr, i) => {
+          // Рисуем прямоугольник атрибута
+          ctx.fillStyle = attributeColor;
+          roundedRect(x + 5, y + 35 + i * 20, width - 10, 18, 5);
+          ctx.fill();
+          ctx.strokeStyle = lineColor;
+          ctx.stroke();
+
+          // Текст атрибута
+          ctx.fillStyle = textColor;
+          ctx.fillText(attr, x + 10, y + 48 + i * 20);
+        });
+      }
+
+      // Функция для рисования отношения
+      function drawRelationship(x, y, width, height, title) {
+        // Рисуем ромб
+        ctx.fillStyle = relationshipColor;
+        ctx.beginPath();
+        ctx.moveTo(x, y + height / 2);
+        ctx.lineTo(x + width / 2, y);
+        ctx.lineTo(x + width, y + height / 2);
+        ctx.lineTo(x + width / 2, y + height);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = lineColor;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        // Текст отношения
+        ctx.fillStyle = "#bf360c";
+        ctx.font = "bold 12px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText(title, x + width / 2, y + height / 2 + 4);
+      }
+
+      // Функция для рисования линии связи
+      function drawConnection(
+        fromX,
+        fromY,
+        toX,
+        toY,
+        fromLabel,
+        toLabel,
+        fromCardinality,
+        toCardinality
+      ) {
+        ctx.beginPath();
+        ctx.moveTo(fromX, fromY);
+        ctx.lineTo(toX, toY);
+        ctx.strokeStyle = lineColor;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        // Рисуем метки кардинальности
+        if (fromLabel) {
+          ctx.fillStyle = textColor;
+          ctx.font = "10px Arial";
+          ctx.textAlign = "center";
+
+          // Позиционируем метку ближе к начальной точке
+          const labelX = fromX + (toX - fromX) * 0.2;
+          const labelY = fromY + (toY - fromY) * 0.2 - 5;
+          ctx.fillText(fromLabel, labelX, labelY);
+        }
+
+        if (toLabel) {
+          ctx.fillStyle = textColor;
+          ctx.font = "10px Arial";
+          ctx.textAlign = "center";
+
+          // Позиционируем метку ближе к конечной точке
+          const labelX = fromX + (toX - fromX) * 0.8;
+          const labelY = fromY + (toY - fromY) * 0.8 - 5;
+          ctx.fillText(toLabel, labelX, labelY);
+        }
+
+        // Рисуем обозначения кардинальности
+        drawCardinality(fromX, fromY, toX, toY, fromCardinality, 0.2);
+        drawCardinality(fromX, fromY, toX, toY, toCardinality, 0.8);
+      }
+
+      // Функция для рисования обозначений кардинальности
+      function drawCardinality(fromX, fromY, toX, toY, cardinality, position) {
+        const x = fromX + (toX - fromX) * position;
+        const y = fromY + (toY - fromY) * position;
+
+        ctx.fillStyle = textColor;
+        ctx.font = "10px Arial";
+        ctx.textAlign = "center";
+
+        if (cardinality === "1") {
+          // Рисуем "1"
+          ctx.fillText("1", x, y - 10);
+        } else if (cardinality === "N") {
+          // Рисуем "N"
+          ctx.fillText("N", x, y - 10);
+        } else if (cardinality === "M") {
+          // Рисуем "M"
+          ctx.fillText("M", x, y - 10);
+        } else if (cardinality === "crowfoot") {
+          // Рисуем "воронью лапку" для many
+          ctx.beginPath();
+          ctx.moveTo(x - 5, y - 5);
+          ctx.lineTo(x + 5, y - 5);
+          ctx.moveTo(x - 5, y - 5);
+          ctx.lineTo(x, y);
+          ctx.moveTo(x + 5, y - 5);
+          ctx.lineTo(x, y);
+          ctx.stroke();
+        }
+      }
+
+      // Рисуем сущности с новыми координатами для лучшего размещения
+      drawEntity(150, 100, 220, 180, "Персональные данные", [
+        "ID_данных (PK)",
+        "Тип_данных",
+        "Значение",
+        "Дата_поступления",
+        "Степень_конфиденциальности",
+      ]);
+
+      drawEntity(550, 100, 220, 160, "Обезличенные данные", [
+        "ID_преобразования (PK)",
+        "Преобразованное_значение",
+        "Метод_обезличивания",
+        "Дата_трансформации",
+      ]);
+
+      drawEntity(350, 350, 220, 160, "Таблица соответствия", [
+        "ID_соответствия (PK)",
+        "ID_оригинала (FK)",
+        "ID_преобразования (FK)",
+        "Хэш_ключа",
+        "Срок_хранения",
+      ]);
+
+      drawEntity(150, 550, 220, 140, "Узлы хранения", [
+        "ID_узла (PK)",
+        "Тип_узла",
+        "Гео_локация",
+        "Уровень_защиты",
+      ]);
+
+      drawEntity(
+        850,
+        100,
+        220,
+        140,
+        "Операции обезличивания",
+        ["ID_операции", "ID_пользователя", "ID_алгоритма", "Статус", "Временная_метка"],
+        true
+      );
+
+      drawEntity(
+        850,
+        300,
+        220,
+        120,
+        "Политики доступа",
+        ["ID_политики", "Роль", "Уровень_доступа", "Срок_действия"],
+        true
+      );
+
+      drawEntity(850, 100, 220, 140, "Другие узлы", [], true);
+    </script>
+  </body>
+</html>

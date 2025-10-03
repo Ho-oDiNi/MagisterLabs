@@ -1,0 +1,4 @@
+[0m[[0m[31merror[0m] [0m[0mC:\labs\MAGISTER\1 course\TRPO\Lab-2-1\lab1\src\main\scala\my\scalafx\Main.scala:134:16: reassignment to val[0m
+[0m[[0m[31merror[0m] [0m[0m    resultText = new Label("")[0m
+[0m[[0m[31merror[0m] [0m[0m               ^[0m
+[0m[[0m[31merror[0m] [0m[0mone error found[0m

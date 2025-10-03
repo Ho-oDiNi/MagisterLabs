@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<title>Диаграмма системы</title>
+<style>
+  canvas {
+    border: 1px solid #ccc;
+    background-color: #f9f9f9;
+  }
+</style>
+</head>
+<body>
+<canvas id="systemDiagram" width="1200" height="800"></canvas>
+<script>
+const canvas = document.getElementById('systemDiagram');
+const ctx = canvas.getContext('2d');
+
+// Универсальные функции для рисования
+function drawRect(x, y, width, height, color, label) {
+  ctx.fillStyle = color;
+  ctx.fillRect(x, y, width, height);
+  ctx.strokeStyle = '#000';
+  ctx.strokeRect(x, y, width, height);
+  if (label) {
+    ctx.fillStyle = '#000';
+    ctx.font = '12px Arial';
+    ctx.fillText(label, x + 5, y + height / 2);
+  }
+}
+
+function drawCircle(x, y, radius, color, label) {
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.arc(x, y, radius, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = '#000';
+  ctx.stroke();
+  if (label) {
+    ctx.fillStyle = '#000';
+    ctx.font = '12px Arial';
+    ctx.fillText(label, x - radius, y + radius + 12);
+  }
+}
+
+function drawIcon(x, y, label) {
+  ctx.fillStyle = '#000';
+  ctx.font = '14px Arial';
+  ctx.fillText(label, x, y);
+}
+
+function drawLine(x1, y1, x2, y2, style='solid') {
+  if (style === 'dashed') {
+    ctx.setLineDash([5, 5]);
+  } else if (style === 'wavy') {
+    // Простая волнистая линия
+    ctx.setLineDash([]);
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    let waveCount = Math.abs(x2 - x1) / 10;
+    for (let i=0; i<=waveCount; i++) {
+      let dx = x1 + i*10;
+      let dy = y1 + (i%2===0 ? 5 : -5);
+      ctx.lineTo(dx, dy);
+    }
+    ctx.stroke();
+    ctx.setLineDash([]);
+    return;
+  }
+
+  ctx.setLineDash([]);
+  ctx.beginPath();
+  ctx.moveTo(x1, y1);
+  ctx.lineTo(x2, y2);
+  ctx.stroke();
+}
+
+// 1. Периферийный уровень
+const peripheralXStart = 100;
+const peripheralY = 700;
+const branchCount = 4;
+const branchSpacing = 200;
+const branchWidth = 100;
+const branchHeight = 80;
+
+for (let i=0; i<branchCount; i++) {
+  const x = peripheralXStart + i*branchSpacing;
+  // Рисуем прямоугольник филиала
+  drawRect(x, peripheralY, branchWidth, branchHeight, '#FFA500', 'Филиал');
+
+  // Модули внутри филиала
+  // Модуль приема данных
+  drawRect(x+5, peripheralY+5, 90, 20, '#FFA500', 'Прием данных');
+  // Модуль первичной идентификации
+  drawRect(x+5, peripheralY+30, 90, 20, '#FFA500', 'Идентификация');
+  // Локальное хранилище
+  drawRect(x+5, peripheralY+55, 90, 20, '#FFA500', 'Хранилище');
+
+  // Соединение с региональными центрами
+  // Предположим, центральная точка 600, 300
+  const centerX = 600;
+  const centerY = 300;
+  // Стрелки
+  drawLine(x+branchWidth/2, peripheralY, centerX, centerY+50, 'solid');
+  // Подпись
+  ctx.font = '10px Arial';
+  ctx.fillStyle = '#000';
+  ctx.fillText('Защищенная передача (TLS)', (x+branchWidth/2 + centerX)/2 - 50, (peripheralY + centerY+50)/2);
+}
+
+// 2. Региональный уровень
+const regionsX = 400;
+const regionCount = 3;
+const regionSpacing = 250;
+
+for (let i=0; i<regionCount; i++) {
+  const x = regionsX + i*regionSpacing;
+  const y = 150;
+  // Основной блок региона
+  // Шлюз безопасности
+  drawRect(x, y, 100, 50, '#00FF00', 'Щит');
+  // Предварительная обработка
+  drawRect(x, y+60, 100, 50, '#00FF00', 'Конвейер');
+  // Буферное хранилище
+  drawRect(x, y+120, 100, 50, '#00FF00', 'База данных');
+
+  // Соединение с центральным узлом (облако)
+  // Центральный узел в центре
+}
+const centralX = 600;
+const centralY = 150;
+// Рисуем "облако"
+ctx.fillStyle = '#ccc';
+ctx.beginPath();
+ctx.ellipse(centralX, centralY, 150, 50, 0, 0, Math.PI * 2);
+ctx.fill();
+ctx.strokeStyle = '#000';
+ctx.stroke();
+ctx.fillStyle = '#000';
+ctx.font = '14px Arial';
+ctx.fillText('Защита через распределение', centralX - 70, centralY + 5);
+
+// Соединения с регионами
+for (let i=0; i<regionCount; i++) {
+  const x = regionsX + i*regionSpacing + 50;
+  const y = 150 + 25;
+  // Двойная стрелка (обозначим двумя линиями)
+  // Вверх
+  ctx.setLineDash([]);
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  ctx.lineTo(centralX, centralY+50);
+  ctx.stroke();
+
+  ctx.setLineDash([2,2]);
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  ctx.lineTo(centralX, centralY+50);
+  ctx.stroke();
+
+  // Подпись
+  ctx.setLineDash([]);
+  ctx.font = '10px Arial';
+  ctx.fillStyle = '#000';
+  ctx.fillText('Криптозащищенный канал', (x+centralX)/2 - 50, (y+centralY+50)/2);
+}
+
+// 3. Центральный уровень
+// Облако уже нарисовано
+
+// Внутри облака - компоненты
+// Ядро обезличивания (центральный круг)
+drawCircle(600, 150, 60, '#ddd', 'Обезличивание');
+
+// Иконки внутри
+drawIcon(600-20, 150, 'Токенизатор');
+drawIcon(600-20, 170, 'Псевдоним');
+drawIcon(600-20, 190, 'Агрегатор');
+
+// Система управления ключами
+drawRect(600+150, 150, 80, 50, '#ADD8E6', 'Управление ключами');
+// Блокчейн-журнал
+drawRect(600+150, 210, 80, 50, '#ADD8E6', 'Блокчейн');
+// Главное хранилище (3 сервера)
+drawRect(600+150, 270, 80, 50, '#ADD8E6', 'Обезличенные');
+drawRect(600+250, 270, 80, 50, '#ADD8E6', 'Таблицы');
+drawRect(600+350, 270, 80, 50, '#ADD8E6', 'Метаданные');
+
+// Связи между компонентами
+drawLine(600, 150, 600+150, 150+25, 'solid'); // ядро - управление ключами
+drawLine(600, 150, 600+150, 210+25, 'solid'); // ядро - блокчейн
+drawLine(600+150, 150+25, 600+150, 270+25, 'solid'); // управление ключами - обезличенные
+drawLine(600+150, 210+25, 600+250, 270+25, 'solid');
+drawLine(600+250, 270+25, 600+350, 270+25, 'solid');
+
+// 4. Легенда в правом нижнем углу
+ctx.setLineDash([]);
+ctx.font = '12px Arial';
+ctx.fillStyle = '#000';
+ctx.fillText('Легенда:', 950, 700);
+ctx.fillText('Сплошная линия - Передача данных', 950, 720);
+ctx.fillText('Пунктир - Защита данных', 950, 740);
+ctx.fillText('Волнистая - Синхронизация', 950, 760);
+
+// 5. Логотип в левом верхнем углу
+ctx.fillStyle = '#000';
+ctx.font = '16px Arial';
+ctx.fillText('Логотип системы', 20, 30);
+
+// 6. Стилизованный щит по периметру (простой пример)
+ctx.strokeStyle = '#000';
+ctx.lineWidth = 4;
+ctx.strokeRect(10, 10, 1180, 780);
+ctx.font = '24px Arial';
+ctx.fillStyle = '#000';
+ctx.fillText('🛡️', 60, 50);
+
+</script>
+</body>
+</html>

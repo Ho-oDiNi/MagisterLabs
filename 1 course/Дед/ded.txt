@@ -1,0 +1,119 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from obspy import read
+from obspy.signal.cross_correlation import correlate
+from obspy.signal.cross_correlation import xcorr_max
+
+def calculate_azimuth(st, sensor_spacing, velocity):
+    """
+    Расчет азимута на источник сигнала методом кросс-корреляции
+    
+    Параметры:
+    st - Stream объект Obspy с данными датчиков
+    sensor_spacing - расстояние между датчиками (м)
+    velocity - скорость волны (м/с)
+    
+    Возвращает:
+    azimuth - азимут на источник (градусы)
+    max_corr - максимальное значение корреляции (для оценки качества)
+    """
+    n = len(st)
+    if n < 2:
+        raise ValueError("Необходимо как минимум 2 датчика")
+    
+    delays = []
+    # Вычисляем задержки между всеми парами датчиков
+    for i in range(n-1):
+        tr1 = st[i]
+        tr2 = st[i+1]
+        corr = correlate(tr1, tr2, 100)
+        shift, value = xcorr_max(corr)
+        delays.append(shift / tr1.stats.sampling_rate)
+    
+    # Преобразуем задержки в углы
+    angles = []
+    for delay in delays:
+        angle = np.arcsin(delay * velocity / sensor_spacing)
+        angles.append(np.degrees(angle))
+    
+    return np.mean(angles), np.max(value)
+
+def process_mseed_file(filename, sensor_count, sensor_spacing=100, velocity=2000):
+    """
+    Обработка файла MSEED и оценка точности определения азимута
+    
+    Параметры:
+    filename - путь к файлу MSEED
+    sensor_count - количество датчиков для использования (2-7)
+    sensor_spacing - расстояние между датчиками (м)
+    velocity - предполагаемая скорость волны (м/с)
+    
+    Возвращает:
+    result - словарь с результатами обработки
+    """
+    st = read(filename)
+    
+    if len(st) < sensor_count:
+        raise ValueError(f"В файле только {len(st)} трассы, а требуется {sensor_count}")
+    
+    # Выбираем нужное количество датчиков
+    st_selected = st[:sensor_count]
+    
+    # Вычисляем азимут
+    azimuth, corr_value = calculate_azimuth(st_selected, sensor_spacing, velocity)
+    
+    return {
+        'filename': filename,
+        'sensor_count': sensor_count,
+        'azimuth': azimuth,
+        'correlation': corr_value,
+        'sensor_spacing': sensor_spacing,
+        'velocity': velocity
+    }
+
+def plot_results(results_list):
+    """Визуализация результатов для разного количества датчиков"""
+    counts = []
+    azimuths = []
+    correlations = []
+    
+    for result in results_list:
+        counts.append(result['sensor_count'])
+        azimuths.append(result['azimuth'])
+        correlations.append(result['correlation'])
+    
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8))
+    
+    # График азимутов
+    ax1.plot(counts, azimuths, 'bo-')
+    ax1.set_title('Зависимость расчетного азимута от количества датчиков')
+    ax1.set_xlabel('Количество датчиков')
+    ax1.set_ylabel('Азимут (градусы)')
+    ax1.grid(True)
+    
+    # График корреляций
+    ax2.plot(counts, correlations, 'ro-')
+    ax2.set_title('Зависимость качества корреляции от количества датчиков')
+    ax2.set_xlabel('Количество датчиков')
+    ax2.set_ylabel('Максимальная корреляция')
+    ax2.grid(True)
+    
+    plt.tight_layout()
+    plt.show()
+
+# Пример использования
+if __name__ == "__main__":
+    # Обрабатываем один файл с разным количеством датчиков
+    mseed_file = "IC.MDJ.2013.043.mseed"  # Замените на реальный файл
+    
+    results = []
+    for count in range(2, 8):
+        try:
+            result = process_mseed_file(mseed_file, count)
+            results.append(result)
+            print(f"Результат для {count} датчиков: азимут {result['azimuth']:.1f}°, корреляция {result['correlation']:.3f}")
+        except Exception as e:
+            print(f"Ошибка при обработке {count} датчиков: {str(e)}")
+    
+    # Визуализируем результаты
+    plot_results(results)

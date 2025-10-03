@@ -1,0 +1,128 @@
+<mxGraphModel>
+  <root>
+    <!-- Слой с элементами диаграммы -->
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    
+    <!-- Легенда -->
+    <mxCell id="legend" value="Легенда" style="shape=rectangle;whiteSpace=wrap;html=1;align=center;fontStyle=1" parent="1" vertex="1">
+      <mxGeometry as="geometry" x="1000" y="600" width="200" height="180"/>
+    </mxCell>
+    
+    <!-- Элементы легенды -->
+    <mxCell id="legend1" value="Типы соединений:" style="text;html=1;align=left;spacingLeft=4" parent="1" vertex="1">
+      <mxGeometry as="geometry" x="1010" y="630" width="180" height="20"/>
+    </mxCell>
+    <mxCell id="legend2" value="Сплошные - синхронные" style="text;html=1;align=left;spacingLeft=4" parent="1" vertex="1">
+      <mxGeometry as="geometry" x="1010" y="650" width="180" height="20"/>
+    </mxCell>
+    <mxCell id="legend3" value="Пунктирные - асинхронные" style="text;html=1;align=left;spacingLeft=4" parent="1" vertex="1">
+      <mxGeometry as="geometry" x="1010" y="670" width="180" height="20"/>
+    </mxCell>
+    <mxCell id="legend4" value="Красные - аварийные" style="text;html=1;align=left;spacingLeft=4" parent="1" vertex="1">
+      <mxGeometry as="geometry" x="1010" y="690" width="180" height="20"/>
+    </mxCell>
+    <mxCell id="legend5" value="Иконки хранилищ:" style="text;html=1;align=left;spacingLeft=4;fontStyle=1" parent="1" vertex="1">
+      <mxGeometry as="geometry" x="1010" y="710" width="180" height="20"/>
+    </mxCell>
+    <mxCell id="legend6" value="Круг - полная копия" style="shape=ellipse;whiteSpace=wrap;html=1;align=center" parent="1" vertex="1">
+      <mxGeometry as="geometry" x="1010" y="735" width="180" height="30"/>
+    </mxCell>
+    <mxCell id="legend7" value="Полукруг - шардированные" style="shape=ellipse;whiteSpace=wrap;html=1;align=center;arcSize=50" parent="1" vertex="1">
+      <mxGeometry as="geometry" x="1010" y="770" width="180" height="30"/>
+    </mxCell>
+    <mxCell id="legend8" value="Квадрат - временный кэш" style="shape=rectangle;whiteSpace=wrap;html=1;align=center" parent="1" vertex="1">
+      <mxGeometry as="geometry" x="1010" y="805" width="180" height="30"/>
+    </mxCell>
+
+    <!-- Центральный сервер -->
+    <mxCell id="central" value="Центральный сервер" style="ellipse;whiteSpace=wrap;html=1;align=center;fillColor=#4D90FE;gradientColor=#1A73E8;strokeColor=#1C3AA9" parent="1" vertex="1">
+      <mxGeometry as="geometry" x="450" y="50" width="180" height="120"/>
+    </mxCell>
+    
+    <!-- Блоки центрального сервера -->
+    <mxCell id="block1" value="Управление соответствиями" style="shape=rectangle;whiteSpace=wrap;html=1;align=center;image=img/clipart/data_128x128.png" parent="1" vertex="1">
+      <mxGeometry as="geometry" x="420" y="80" width="120" height="40"/>
+    </mxCell>
+    <mxCell id="block2" value="Метаданные распределения" style="shape=rectangle;whiteSpace=wrap;html=1;align=center;image=img/clipart/map_128x128.png" parent="1" vertex="1">
+      <mxGeometry as="geometry" x="540" y="80" width="120" height="40"/>
+    </mxCell>
+    
+    <!-- Региональные узлы -->
+    <mxCell id="region1" value="Северный регион\n(Филиалы 1-4)" style="ellipse;whiteSpace=wrap;html=1;align=center;fillColor=#81C784;gradientColor=#66BB6A;strokeColor=#43A047" parent="1" vertex="1">
+      <mxGeometry as="geometry" x="200" y="250" width="150" height="100"/>
+    </mxCell>
+    <mxCell id="region2" value="Центральный регион\n(Филиалы 5-8)" style="ellipse;whiteSpace=wrap;html=1;align=center;fillColor=#81C784;gradientColor=#66BB6A;strokeColor=#43A047" parent="1" vertex="1">
+      <mxGeometry as="geometry" x="450" y="250" width="150" height="100"/>
+    </mxCell>
+    <mxCell id="region3" value="Южный регион\n(Филиалы 9-12)" style="ellipse;whiteSpace=wrap;html=1;align=center;fillColor=#81C784;gradientColor=#66BB6A;strokeColor=#43A047" parent="1" vertex="1">
+      <mxGeometry as="geometry" x="700" y="250" width="150" height="100"/>
+    </mxCell>
+    
+    <!-- Связи центра с регионами -->
+    <mxCell id="link1" style="edgeStyle=none;html=1;endArrow=classic;startArrow=none;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitX=0.25;exitY=1;exitDx=0;exitDy=0;strokeColor=#1A73E8;strokeWidth=3" parent="1" source="central" target="region1" edge="1">
+      <mxGeometry as="geometry" relative="1"/>
+    </mxCell>
+    <mxCell id="link2" style="edgeStyle=none;html=1;endArrow=classic;startArrow=none;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;strokeColor=#1A73E8;strokeWidth=3" parent="1" source="central" target="region2" edge="1">
+      <mxGeometry as="geometry" relative="1"/>
+    </mxCell>
+    <mxCell id="link3" style="edgeStyle=none;html=1;endArrow=classic;startArrow=none;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitX=0.75;exitY=1;exitDx=0;exitDy=0;strokeColor=#1A73E8;strokeWidth=3" parent="1" source="central" target="region3" edge="1">
+      <mxGeometry as="geometry" relative="1"/>
+    </mxCell>
+    
+    <!-- Связи между регионами (асинхронные) -->
+    <mxCell id="link4" style="edgeStyle=none;html=1;endArrow=classic;startArrow=none;dashed=1;strokeColor=#4CAF50;strokeWidth=2" parent="1" source="region1" target="region2" edge="1">
+      <mxGeometry as="geometry" relative="1"/>
+    </mxCell>
+    <mxCell id="link5" style="edgeStyle=none;html=1;endArrow=classic;startArrow=none;dashed=1;strokeColor=#4CAF50;strokeWidth=2" parent="1" source="region2" target="region3" edge="1">
+      <mxGeometry as="geometry" relative="1"/>
+    </mxCell>
+    
+    <!-- Филиальные узлы -->
+    <mxCell id="branch1" value="Филиал 1" style="shape=rectangle;whiteSpace=wrap;html=1;align=center;fillColor=#FFF59D;gradientColor=#FFEE58;strokeColor=#FDD835;image=img/clipart/security_128x128.png" parent="1" vertex="1">
+      <mxGeometry as="geometry" x="150" y="450" width="80" height="60"/>
+    </mxCell>
+    <mxCell id="branch2" value="Филиал 2" style="shape=rectangle;whiteSpace=wrap;html=1;align=center;fillColor=#FFF59D;gradientColor=#FFEE58;strokeColor=#FDD835;image=img/clipart/security_128x128.png" parent="1" vertex="1">
+      <mxGeometry as="geometry" x="250" y="450" width="80" height="60"/>
+    </mxCell>
+    <mxCell id="branch3" value="Филиал 3" style="shape=rectangle;whiteSpace=wrap;html=1;align=center;fillColor=#FFF59D;gradientColor=#FFEE58;strokeColor=#FDD835;image=img/clipart/security_128x128.png" parent="1" vertex="1">
+      <mxGeometry as="geometry" x="150" y="550" width="80" height="60"/>
+    </mxCell>
+    <mxCell id="branch4" value="Филиал 4" style="shape=rectangle;whiteSpace=wrap;html=1;align=center;fillColor=#FFF59D;gradientColor=#FFEE58;strokeColor=#FDD835;image=img/clipart/security_128x128.png" parent="1" vertex="1">
+      <mxGeometry as="geometry" x="250" y="550" width="80" height="60"/>
+    </mxCell>
+    
+    <!-- Связи регионов с филиалами -->
+    <mxCell id="link6" style="edgeStyle=none;html=1;endArrow=classic;startArrow=none;entryX=0.5;entryY=1;entryDx=0;entryDy=0;exitX=0.2;exitY=0;exitDx=0;exitDy=0;strokeWidth=2" parent="1" source="region1" target="branch1" edge="1">
+      <mxGeometry as="geometry" relative="1"/>
+    </mxCell>
+    <mxCell id="link7" style="edgeStyle=none;html=1;endArrow=classic;startArrow=none;entryX=0.5;entryY=1;entryDx=0;entryDy=0;exitX=0.4;exitY=0;exitDx=0;exitDy=0;strokeWidth=2" parent="1" source="region1" target="branch2" edge="1">
+      <mxGeometry as="geometry" relative="1"/>
+    </mxCell>
+    <mxCell id="link8" style="edgeStyle=none;html=1;endArrow=classic;startArrow=none;entryX=0.5;entryY=1;entryDx=0;entryDy=0;exitX=0.6;exitY=0;exitDx=0;exitDy=0;strokeWidth=2" parent="1" source="region1" target="branch3" edge="1">
+      <mxGeometry as="geometry" relative="1"/>
+    </mxCell>
+    <mxCell id="link9" style="edgeStyle=none;html=1;endArrow=classic;startArrow=none;entryX=0.5;entryY=1;entryDx=0;entryDy=0;exitX=0.8;exitY=0;exitDx=0;exitDy=0;strokeWidth=2" parent="1" source="region1" target="branch4" edge="1">
+      <mxGeometry as="geometry" relative="1"/>
+    </mxCell>
+    
+    <!-- Резервные связи (аварийные) -->
+    <mxCell id="backup1" style="edgeStyle=none;html=1;endArrow=classic;startArrow=none;dashed=1;strokeColor=#E53935;strokeWidth=2" parent="1" source="branch1" target="branch2" edge="1">
+      <mxGeometry as="geometry" relative="1"/>
+    </mxCell>
+    <mxCell id="backup2" style="edgeStyle=none;html=1;endArrow=classic;startArrow=none;dashed=1;strokeColor=#E53935;strokeWidth=2" parent="1" source="branch3" target="branch4" edge="1">
+      <mxGeometry as="geometry" relative="1"/>
+    </mxCell>
+    
+    <!-- Метки для характеристик соединений -->
+    <mxCell id="label1" value="Синхронная репликация\nЗадержка &lt;50мс" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="1" vertex="1">
+      <mxGeometry as="geometry" x="300" y="150" width="120" height="40"/>
+    </mxCell>
+    <mxCell id="label2" value="Асинхронная репликация\nЗадержка &lt;1ч" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="1" vertex="1">
+      <mxGeometry as="geometry" x="400" y="300" width="120" height="40"/>
+    </mxCell>
+    <mxCell id="label3" value="Аварийный канал\nMTTR &lt;4ч" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="1" vertex="1">
+      <mxGeometry as="geometry" x="180" y="500" width="120" height="40"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

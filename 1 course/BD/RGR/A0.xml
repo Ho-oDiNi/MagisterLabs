@@ -1,0 +1,79 @@
+<mxfile host="app.diagrams.net" modified="2024-05-12T14:32:44.247Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36" etag="e_T16qXN5z9_iV993o0M" version="24.1.4" type="device">
+  <diagram name="Страница-1" id="0">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="1600" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="2" value="Система обезличивания данных (A0)" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;" parent="1" vertex="1">
+          <mxGeometry x="200" y="100" width="800" height="600" as="geometry"/>
+        </mxCell>
+        <mxCell id="3" value="A1: Анализ и классификация данных" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="2" vertex="1">
+          <mxGeometry x="100" y="50" width="200" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="4" value="A2: Определение методов обезличивания" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="2" vertex="1">
+          <mxGeometry x="400" y="50" width="200" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="5" value="A3: Применение обезличивания" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="2" vertex="1">
+          <mxGeometry x="100" y="200" width="200" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="6" value="A4: Верификация и аудит" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="2" vertex="1">
+          <mxGeometry x="400" y="200" width="200" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="7" value="Исходные данные (PII)" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fillColor=#f8cecc;strokeColor=#b85450;" parent="2" vertex="1">
+          <mxGeometry x="50" y="350" width="120" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="8" style="edgeStyle=none;curved=1;endArrow=open;dashed=1;" parent="2" source="7" target="3" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+		  <mxPoint x="110" y="350" as="sourcePoint"/>
+            <mxPoint x="200" y="90" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="9" value="Нормативные требования (GDPR, 152-ФЗ)" style="shape=rhombus;perimeter=rhombusPerimeter;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" parent="2" vertex="1">
+          <mxGeometry x="500" y="350" width="120" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="10" style="edgeStyle=none;curved=1;endArrow=open;dashed=1;" parent="2" source="9" target="3" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="560" y="350" as="sourcePoint"/>
+            <mxPoint x="300" y="90" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="11" value="Инструменты (DLP, ETL)" style="shape=ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="2" vertex="1">
+          <mxGeometry x="300" y="450" width="120" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="12" style="edgeStyle=none;curved=1;endArrow=open;dashed=1;" parent="2" source="11" target="5" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="360" y="450" as="sourcePoint"/>
+            <mxPoint x="200" y="280" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="13" value="Обезличенные данные" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fillColor=#e1d5e7;strokeColor=#9673a6;" parent="2" vertex="1">
+          <mxGeometry x="600" y="450" width="120" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="14" style="edgeStyle=none;curved=1;endArrow=open;dashed=1;" parent="2" source="6" target="13" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="500" y="280" as="sourcePoint"/>
+            <mxPoint x="660" y="450" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="15" style="edgeStyle=none;curved=1;endArrow=open;dashed=0;" parent="2" source="3" target="4" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="300" y="90" as="sourcePoint"/>
+            <mxPoint x="400" y="90" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="16" style="edgeStyle=none;curved=1;endArrow=open;dashed=0;" parent="2" source="4" target="5" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="400" y="130" as="sourcePoint"/>
+            <mxPoint x="200" y="200" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="17" style="edgeStyle=none;curved=1;endArrow=open;dashed=0;" parent="2" source="5" target="6" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="300" y="240" as="sourcePoint"/>
+            <mxPoint x="400" y="240" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

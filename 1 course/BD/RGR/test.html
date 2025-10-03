@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Архитектура системы обезличивания данных</title>
+    <style>
+      canvas {
+        border: 1px solid #ddd;
+        display: block;
+        margin: 0 auto;
+        background: linear-gradient(to bottom, #ffeeee, #ffffcc, #eeffee);
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="diagramCanvas" width="1000" height="900"></canvas>
+
+    <script>
+
+// Функция для рисования сейфа с ключами
+function drawSafeWithKeys(x, y, size) {
+    // Сейф - корпус
+    ctx.fillStyle = '#bcaaa4';
+    ctx.fillRect(x - size / 2, y - size / 2, size, size * 1.2);
+    ctx.strokeStyle = '#8d6e63';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(x - size / 2, y - size / 2, size, size * 1.2);
+
+    // Дверца сейфа
+    ctx.fillStyle = '#a1887f';
+    ctx.fillRect(x - size / 3, y - size / 3, size / 1.5, size * 0.9);
+    ctx.strokeRect(x - size / 3, y - size / 3, size / 1.5, size * 0.9);
+
+    // Ручка (круглый ключ)
+    ctx.beginPath();
+    ctx.arc(x + size / 5, y + size / 10, size / 10, 0, Math.PI * 2);
+    ctx.fillStyle = '#ffd54f';
+    ctx.fill();
+    ctx.stroke();
+
+    // Ключ внутри ручки
+    ctx.beginPath();
+    ctx.moveTo(x + size / 5, y + size / 15);
+    ctx.lineTo(x + size / 5, y + size / 5);
+    ctx.lineTo(x + size / 5 + size / 15, y + size / 5);
+    ctx.moveTo(x + size / 5 + size / 30, y + size / 5);
+    ctx.lineTo(x + size / 5 + size / 30, y + size / 6);
+    ctx.strokeStyle = '#fbc02d';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.lineWidth = 1;
+}
+
+// Функция для рисования цепочки блоков (блокчейн-журнал)
+function drawBlockchainChain(x, y, size) {
+    const blockSize = size * 0.3;
+    ctx.fillStyle = '#90caf9';
+    ctx.strokeStyle = '#42a5f5';
+    ctx.lineWidth = 2;
+
+    for (let i = 0; i < 3; i++) {
+        let bx = x + i * (blockSize + 10);
+        ctx.fillRect(bx, y, blockSize, blockSize);
+        ctx.strokeRect(bx, y, blockSize, blockSize);
+    }
+
+    // Связи между блоками
+    ctx.beginPath();
+    ctx.moveTo(x + blockSize, y + blockSize / 2);
+    ctx.lineTo(x + blockSize + 10, y + blockSize / 2);
+    ctx.moveTo(x + 2 * (blockSize + 10), y + blockSize / 2);
+    ctx.lineTo(x + 2 * (blockSize + 10) + 10, y + blockSize / 2);
+    ctx.strokeStyle = '#1976d2';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+    ctx.lineWidth = 1;
+}
+
+// Функция для рисования сервера (основное хранилище)
+function drawServer(x, y, width, height) {
+    ctx.fillStyle = '#64b5f6';
+    ctx.fillRect(x - width / 2, y - height / 2, width, height);
+    ctx.strokeStyle = '#1e88e5';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(x - width / 2, y - height / 2, width, height);
+
+    // Элементы интерфейса (горизонтальные полосы)
+    ctx.fillStyle = '#bbdefb';
+    const barHeight = height / 6;
+    for (let i = 0; i < 4; i++) {
+        ctx.fillRect(x - width / 2 + 5, y - height / 2 + 5 + i * (barHeight + 3), width - 10, barHeight);
+    }
+    ctx.lineWidth = 1;
+}
+
+// Функция для рисования стрелок с подписью и стилем линии
+function drawArrowWithLabel(fromX, fromY, toX, toY, label, style = 'solid', double = false) {
+    ctx.strokeStyle = '#333';
+    ctx.fillStyle = '#333';
+    ctx.lineWidth = 2;
+
+    // Настройка стиля линии
+    if (style === 'dashed') {
+        ctx.setLineDash([8, 6]);
+    } else if (style === 'wavy') {
+        ctx.setLineDash([]);
+        // Рисуем волнистую линию вручную
+        const waveLength = 15;
+        const amplitude = 5;
+        const dx = toX - fromX;
+        const dy = toY - fromY;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        const segments = Math.floor(distance / waveLength);
+        const angle = Math.atan2(dy, dx);
+        ctx.beginPath();
+        for (let i = 0; i <= segments; i++) {
+            const x = fromX + (dx / segments) * i;
+            const y = fromY + (dy / segments) * i + Math.sin(i * Math.PI * 2 / segments) * amplitude;
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+    } else {
+        ctx.setLineDash([]);
+        ctx.beginPath();
+        ctx.moveTo(fromX, fromY);
+        ctx.lineTo(toX, toY);
+        ctx.stroke();
+    }
+
+    // Рисуем стрелки
+    function drawArrowhead(x, y, angle) {
+        const headLen = 10;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x - headLen * Math.cos(angle - Math.PI / 6), y - headLen * Math.sin(angle - Math.PI / 6));
+        ctx.lineTo(x - headLen * Math.cos(angle + Math.PI / 6), y - headLen * Math.sin(angle + Math.PI / 6));
+        ctx.closePath();
+        ctx.fill();
+    }
+
+    const angle = Math.atan2(toY - fromY, toX - fromX);
+    if (double) {
+        // Рисуем две стрелки, параллельно с небольшим смещением
+        const offset = 5;
+        drawArrowhead(toX, toY + offset, angle);
+        drawArrowhead(toX, toY - offset, angle);
+    } else {
+        drawArrowhead(toX, toY, angle);
+    }
+
+    // Подпись
+    if (label) {
+        ctx.font = '12px Arial';
+        ctx.fillStyle = '#000';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'bottom';
+        const labelX = (fromX + toX) / 2;
+        const labelY = (fromY + toY) / 2 - 8;
+        ctx.fillText(label, labelX, labelY);
+    }
+
+    ctx.setLineDash([]);
+    ctx.lineWidth = 1;
+}
+
+// Основная функция отрисовки всей диаграммы
+function drawDiagram() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Периферийный уровень (филиалы)
+    const peripheralCount = 4;
+    const peripheralWidth = 150;
+    const peripheralHeight = 110;
+    const peripheralStartX = 100;
+    const peripheralY = 650;
+    const peripheralGap = 50;
+
+    for (let i = 0; i < peripheralCount; i++) {
+        const x = peripheralStartX + i * (peripheralWidth + peripheralGap);
+        const y = peripheralY;
+
+        // Рамка филиала
+        ctx.fillStyle = '#fff3e0'; // оранжевый оттенок для обработки
+        roundedRect(x, y, peripheralWidth, peripheralHeight, 15);
+
+        // Заголовок
+        ctx.fillStyle = '#bf360c';
+        ctx.font = '16px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(`Филиал ${i + 1}`, x + peripheralWidth / 2, y + 25);
+
+        // Иконки модулей
+        drawDocument(x + 20, y + 50, 30);     // Модуль приема данных
+        drawMagnifier(x + 70, y + 65, 30);   // Модуль идентификации
+        drawLockedDatabase(x + 120, y + 40, 50, 50); // Локальное хранилище
+
+        // Стрелка к региональному уровню
+        drawArrowWithLabel(x + peripheralWidth / 2, y, x + peripheralWidth / 2, y - 120, 'Защищенная передача (TLS)');
+    }
+
+    // Региональный уровень (центры обработки)
+    const regionalCount = 3;
+    const regionalWidth = 180;
+    const regionalHeight = 130;
+    const regionalStartX = 250;
+    const regionalY = 480;
+    const regionalGap = 70;
+
+    for (let i = 0; i < regionalCount; i++) {
+        const x = regionalStartX + i * (regionalWidth + regionalGap);
+        const y = regionalY;
+
+        // Рамка центра
+        ctx.fillStyle = '#ffebee'; // красноватый оттенок для обработки
+        roundedRect(x, y, regionalWidth, regionalHeight, 20);
+
+        // Заголовок
+        ctx.fillStyle = '#b71c1c';
+        ctx.font = '18px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(`Центр ${i + 1}`, x + regionalWidth / 2, y + 30);
+
+        // Иконки компонентов
+        drawShield(x + 50, y + 80, 40);         // Шлюз безопасности
+        drawConveyor(x + 110, y + 65, 60, 50);  // Модуль предварительной обработки
+        drawTimedDatabase(x + 170, y + 60, 60, 60); // Буферное хранилище
+
+        // Двойная стрелка к центральному уровню
+        drawArrowWithLabel(x + regionalWidth / 2, y, x + regionalWidth / 2, y - 150, 'Криптозащищенный канал', 'solid', true);
+    }
+
+    // Центральный уровень (головной офис)
+    const centerX = canvas.width / 2;
+    const centerY = 180;
+
+    // Облако
+    drawCloud(centerX - 160, centerY - 100, 320, 160);
+
+    // Лозунг внутри облака
+    ctx.fillStyle = '#0d47a1';
+    ctx.font = '22px Arial italic';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('Защита через распределение', centerX, centerY + 40);
+
+    // Ядро обезличивания
+    drawCore(centerX, centerY - 40, 70);
+
+    // Система управления ключами (сейф)
+    drawSafeWithKeys(centerX - 140, centerY + 90, 60);
+    ctx.fillStyle = '#4e342e';
+    ctx.font = '14px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('Упр. ключами', centerX - 140, centerY + 160);
+
+    // Блокчейн-журнал
+    drawBlockchainChain(centerX, centerY + 90, 60);
+    ctx.fillStyle = '#0d47a1';
+    ctx.fillText('Блокчейн-журнал', centerX, centerY + 160);
+
+    // Главное хранилище (3 сервера)
+    const serverY = centerY + 90;
+    const serverWidth = 60;
+    const serverHeight = 40;
+    const serverSpacing = 80;
+    const serverXStart = centerX + 100;
+
+    drawServer(serverXStart, serverY, serverWidth, serverHeight);
+    ctx.fillStyle = '#1565c0';
+    ctx.fillText('Обезличенные данные', serverXStart, serverY + 60);
+    drawServer(serverXStart + serverSpacing, serverY, serverWidth, serverHeight);
+    ctx.fillText('Таблицы соответствия', serverXStart + serverSpacing, serverY + 60);
+    drawServer(serverXStart + 2 * serverSpacing, serverY, serverWidth, serverHeight);
+    ctx.fillText('Метаданные операций', serverXStart + 2 * serverSpacing, serverY + 60);
+
+    // Логотип системы (левый верхний угол)
+    ctx.fillStyle = '#0d47a1';
+    ctx.font = '28px Arial bold';
+    ctx.textAlign = 'left';
+    ctx.fillText('Система Обезличивания', 20, 40);
+    ctx.fillText('Междугородних Перевозок', 20, 75);
+
+    // Легенда (правый нижний угол)
+    const legendX = canvas.width - 300;
+    const legendY = canvas.height - 180;
+    const legendWidth = 280;
+    const legendHeight = 170;
+
+    // Фон легенды
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(legendX, legendY, legendWidth, legendHeight);
+    ctx.strokeStyle = '#aaa';
+    ctx.strokeRect(legendX, legendY, legendWidth, legendHeight);
+
+    ctx.fillStyle = '#000';
+    ctx.font = '18px Arial';
+    ctx.textAlign = 'left';
+    ctx.fillText('Легенда', legendX + 10, legendY + 30);
+
+    // Типы линий
+    // Восходящие - сплошные
+    ctx.strokeStyle = '#333';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([]);
+    ctx.beginPath();
+    ctx.moveTo(legendX + 20, legendY + 60);
+    ctx.lineTo(legendX + 80, legendY + 60);
+    ctx.stroke();
+    ctx.fillText('Восходящая (сплошная)', legendX + 90, legendY + 65);
+
+    // Нисходящие - пунктирные
+    ctx.setLineDash([8, 6]);
+    ctx.beginPath();
+    ctx.moveTo(legendX + 20, legendY + 90);
+    ctx.lineTo(legendX + 80, legendY + 90);
+    ctx.stroke();
+    ctx.fillText('Нисходящая (пунктирная)', legendX + 90, legendY + 95);
+
+    // Синхронизация - волнистые
+    ctx.setLineDash([]);
+    const waveStartX = legendX + 20;
+    const waveStartY = legendY + 120;
+    const waveLength = 20;
+    const amplitude = 5;
+    ctx.beginPath();
+    for(let i = 0; i <= 3; i++) {
+        const x = waveStartX + i * waveLength;
+        const y = waveStartY + (i % 2 === 0 ? amplitude : -amplitude);
+        if(i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    ctx.fillText('Синхронизация (волнистая)', legendX + 90, legendY + 125);
+
+    // Уровни защиты данных
+    // Зеленый - защитные механизмы
+    ctx.fillStyle = '#22C55E';
+    ctx.fillRect(legendX + 20, legendY + 150, 20, 20);
+    ctx.fillStyle = '#000';
+    ctx.fillText('Защитные механизмы', legendX + 50, legendY + 165);
+
+    // Красный/оранжевый - компоненты обработки
+    ctx.fillStyle = '#FF6F3C';
+    ctx.fillRect(legendX + 160, legendY + 150, 20, 20);
+    ctx.fillStyle = '#000';
+    ctx.fillText('Компоненты обработки', legendX + 190, legendY + 165);
+
+    // Синий - хранилища данных
+    ctx.fillStyle = '#3B82F6';
+    ctx.fillRect(legendX + 20, legendY + 180, 20, 20);
+    ctx.fillStyle = '#000';
+    ctx.fillText('Хранилища данных', legendX + 50, legendY + 195);
+
+    // Стилизованный щит по периметру
+    ctx.strokeStyle = '#94A3B8';
+    ctx.lineWidth = 8;
+    ctx.beginPath();
+    ctx.moveTo(10, 10);
+    ctx.lineTo(canvas.width - 10, 10);
+    ctx.lineTo(canvas.width - 10, canvas.height - 10);
+    ctx.lineTo(10, canvas.height - 10);
+    ctx.closePath();
+    ctx.stroke();
+}
+
+drawDiagram();
+</script>
+  </body>
+</html>
